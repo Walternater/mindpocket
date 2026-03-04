@@ -10,7 +10,7 @@ const dictionaries = {
   zh: {
     nav: {
       features: "功能",
-      solutions: "方案",
+      solutions: "价格",
       platform: "多端",
       roadmap: "路线图",
       login: "登录",
@@ -124,7 +124,7 @@ const dictionaries = {
   en: {
     nav: {
       features: "Features",
-      solutions: "Solutions",
+      solutions: "Pricing",
       platform: "Platform",
       roadmap: "Roadmap",
       login: "Login",

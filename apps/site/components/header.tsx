@@ -4,8 +4,8 @@ import Link from "next/link"
 import React from "react"
 import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 import { useSiteI18n } from "@/lib/site-i18n"
+import { cn } from "@/lib/utils"
 
 type PreviewMode = "web" | "mobile"
 
@@ -21,7 +21,7 @@ export const HeroHeader = ({ previewMode, onPreviewModeChange }: HeroHeaderProps
 
   const menuItems = [
     { name: t.nav.features, href: "#link" },
-    { name: t.nav.solutions, href: "#link" },
+    { name: t.nav.solutions, href: "/price" },
     { name: t.nav.platform, href: "#link" },
     { name: t.nav.roadmap, href: "#link" },
   ]

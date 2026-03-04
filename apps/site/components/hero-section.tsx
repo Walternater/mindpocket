@@ -8,7 +8,10 @@ import { AnimatedGroup } from "@/components/ui/animated-group"
 import { Button } from "@/components/ui/button"
 import { TextEffect } from "@/components/ui/text-effect"
 import { useSiteI18n } from "@/lib/site-i18n"
+import { GitHubStar } from "./github-star"
 import { HeroHeader } from "./header"
+
+const GITHUB_REPO = "https://github.com/jihe520/mindpocket"
 
 const transitionVariants = {
   item: {
@@ -152,7 +155,8 @@ export default function HeroSection() {
                     className="bg-foreground/10 rounded-[calc(var(--radius-xl)+0.125rem)] border p-0.5"
                   >
                     <Button asChild size="lg" className="rounded-xl px-5 text-base">
-                      <Link href="#link">
+                      <Link href={GITHUB_REPO}>
+                        <GitHubStar />
                         <span className="text-nowrap">{t.hero.primaryCta}</span>
                       </Link>
                     </Button>
@@ -164,7 +168,7 @@ export default function HeroSection() {
                     variant="ghost"
                     className="h-10.5 rounded-xl px-5"
                   >
-                    <Link href="#link">
+                    <Link href={GITHUB_REPO}>
                       <span className="text-nowrap">{t.hero.secondaryCta}</span>
                     </Link>
                   </Button>

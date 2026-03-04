@@ -3,6 +3,9 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useSiteI18n } from "@/lib/site-i18n"
+import { GitHubStar } from "./github-star"
+
+const GITHUB_REPO = "https://github.com/jihe520/mindpocket"
 
 export default function CallToAction() {
   const { t } = useSiteI18n()
@@ -16,13 +19,14 @@ export default function CallToAction() {
 
           <div className="mt-12 flex flex-wrap justify-center gap-4">
             <Button asChild size="lg">
-              <Link href="/">
+              <Link href={GITHUB_REPO}>
+                <GitHubStar />
                 <span>{t.cta.primary}</span>
               </Link>
             </Button>
 
             <Button asChild size="lg" variant="outline">
-              <Link href="/">
+              <Link href={GITHUB_REPO}>
                 <span>{t.cta.secondary}</span>
               </Link>
             </Button>
