@@ -60,13 +60,16 @@ This is a pure **VIBE CODING** project:
 2. **Connect to Vercel**
    - Click "New Project" → "Import Git Repository" in Vercel dashboard
    - Select your forked MindPocket repository
+   - Set Root Directory to `apps/web`
+   - Keep Build Command as `pnpm build`
    - Click "Deploy"
    - In "Integrations" tab, add Neon integration and create a free database instance
    - Connect Vercel Blob storage
-   - Add environment variables in "Settings" → "Environment Variables" (refer to `.env.example`)
+   - Add environment variables in "Settings" → "Environment Variables" (refer to `apps/web/.env.example`)
 
 3. **Initialize Database**
-   - Database tables will be created automatically after deployment
+   - No manual action required
+   - During build, the app runs an idempotent bootstrap (`CREATE EXTENSION IF NOT EXISTS vector` + `drizzle-kit migrate`)
 
 4. **Create Admin Account**
    - Visit your deployment URL
@@ -95,7 +98,7 @@ cp .env.example .env.local
 # Edit .env.local with your configuration
 
 # Initialize database
-pnpm db:push
+pnpm db:bootstrap
 
 # Start development server
 cd ../..
