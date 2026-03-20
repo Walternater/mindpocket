@@ -1,4 +1,9 @@
 import { Ionicons } from "@expo/vector-icons"
+import {
+  hasPlatformIcon,
+  PLATFORM_CONFIG,
+  PlatformIcon as PlatformBrandIcon,
+} from "@repo/icons/native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { useEffect, useState } from "react"
 import {
@@ -161,9 +166,20 @@ export default function BookmarkDetailScreen() {
 
 function MetaRow({ bookmark }: { bookmark: BookmarkDetail }) {
   const date = new Date(bookmark.createdAt).toLocaleDateString("zh-CN")
+  const platformLabel = hasPlatformIcon(bookmark.platform)
+    ? PLATFORM_CONFIG[bookmark.platform].label
+    : bookmark.platform
+
   return (
     <View style={styles.metaRow}>
-      {bookmark.platform && <Text style={styles.metaText}>{bookmark.platform}</Text>}
+      {platformLabel && (
+        <View style={styles.metaItem}>
+          {hasPlatformIcon(bookmark.platform) && (
+            <PlatformBrandIcon color="#737373" platform={bookmark.platform} size={14} />
+          )}
+          <Text style={styles.metaText}>{platformLabel}</Text>
+        </View>
+      )}
       {bookmark.author && <Text style={styles.metaText}>{bookmark.author}</Text>}
       <Text style={styles.metaText}>{date}</Text>
     </View>
@@ -224,8 +240,14 @@ const styles = StyleSheet.create({
   },
   metaRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
     marginTop: 12,
+  },
+  metaItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
   metaText: {
     fontSize: 13,

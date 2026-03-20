@@ -61,15 +61,17 @@ export function ChatModelSelector({
   return (
     <ModelSelector onOpenChange={setOpen} open={open}>
       <ModelSelectorTrigger asChild>
-        <PromptInputButton size="sm" tooltip="选择模型">
+        <PromptInputButton size="sm" tooltip={t.chatModelSelector.tooltip}>
           <Bot className="size-4" />
-          <span className="text-xs">{selectedModel?.name ?? "选择模型"}</span>
+          <span className="text-xs">
+            {selectedModel?.name ?? t.chatModelSelector.selectedFallback}
+          </span>
         </PromptInputButton>
       </ModelSelectorTrigger>
-      <ModelSelectorContent title="选择模型">
-        <ModelSelectorInput placeholder="搜索模型..." />
+      <ModelSelectorContent title={t.chatModelSelector.title}>
+        <ModelSelectorInput placeholder={t.chatModelSelector.searchPlaceholder} />
         <ModelSelectorList>
-          <ModelSelectorEmpty>未找到模型</ModelSelectorEmpty>
+          <ModelSelectorEmpty>{t.chatModelSelector.empty}</ModelSelectorEmpty>
           <ModelSelectorGroup>
             {models.map((model) => (
               <ModelSelectorItem

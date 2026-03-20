@@ -1,18 +1,18 @@
 "use client"
 
+import {
+  getWebDictionary,
+  type Locale,
+  type WebTranslationDict,
+} from "@repo/i18n"
 import { createContext, useCallback, useContext, useEffect, useState } from "react"
-import { en } from "./locales/en"
-import type { TranslationDict } from "./locales/zh"
-import { zh } from "./locales/zh"
 
-export type Locale = "zh" | "en"
-
-const dictionaries: Record<Locale, TranslationDict> = { zh, en }
+export type { Locale } from "@repo/i18n"
 
 interface LocaleContextValue {
   locale: Locale
   setLocale: (l: Locale) => void
-  t: TranslationDict
+  t: WebTranslationDict
 }
 
 const STORAGE_KEY = "mindpocket-locale"
@@ -36,7 +36,7 @@ export function LocaleProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = l === "zh" ? "zh-CN" : "en"
   }, [])
 
-  const t = dictionaries[locale]
+  const t = getWebDictionary(locale)
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale, t }}>{children}</LocaleContext.Provider>

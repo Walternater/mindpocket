@@ -35,7 +35,7 @@ yarn-error.log*
 
 # turbo
 .turbo
-PROJECT.md
+docs/PROJECT.md
 apps/web/tsconfig.tsbuildinfo
 .superset/
 .playwright-mcp

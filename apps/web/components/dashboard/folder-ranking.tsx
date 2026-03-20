@@ -8,19 +8,20 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { useT } from "@/lib/i18n"
 
 interface FolderRankingProps {
   data: Array<{ name: string; emoji: string; count: number }>
 }
 
-const chartConfig = {
-  count: {
-    label: "收藏数",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig
-
 export function FolderRanking({ data }: FolderRankingProps) {
+  const t = useT()
+  const chartConfig = {
+    count: {
+      label: t.dashboard.chartCount,
+      color: "hsl(var(--chart-2))",
+    },
+  } satisfies ChartConfig
   const chartData = data.map((item) => ({
     name: `${item.emoji} ${item.name}`,
     count: item.count,
@@ -29,8 +30,8 @@ export function FolderRanking({ data }: FolderRankingProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>文件夹排行</CardTitle>
-        <CardDescription>各文件夹收藏数量 Top 10</CardDescription>
+        <CardTitle>{t.dashboard.folderRankingTitle}</CardTitle>
+        <CardDescription>{t.dashboard.folderRankingDescription}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer className="h-[250px] w-full" config={chartConfig}>

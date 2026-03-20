@@ -258,9 +258,9 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
     async (bookmarkId: string, sourceFolderId: string, targetFolderId: string, title: string) => {
       const success = await moveBookmarkInStore(bookmarkId, sourceFolderId, targetFolderId, title)
       if (success) {
-        toast.success("已移动")
+        toast.success(t.sidebar.bookmarkMoved)
       } else {
-        toast.error("移动失败")
+        toast.error(t.feedback.moveFailed)
       }
     },
     [moveBookmarkInStore]
@@ -271,7 +271,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
       const reordered = arrayMove(folders, oldIndex, newIndex)
       const success = await reorderFoldersInStore(reordered.map((f) => f.id))
       if (!success) {
-        toast.error("排序失败")
+        toast.error(t.feedback.sortFailed)
       }
     },
     [folders, reorderFoldersInStore]

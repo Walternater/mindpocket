@@ -11,9 +11,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { signUp } from "@/lib/auth-client"
+import { useT } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 export function SignupForm({ className, ...props }: React.ComponentProps<"div">) {
+  const t = useT()
   const router = useRouter()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -33,7 +35,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
         setRegistrationMessage(data.message)
       } catch (error) {
         console.error("Failed to check registration status:", error)
-        toast.error("无法检查注册状态")
+        toast.error(t.auth.registrationCheckFailed)
       } finally {
         setCheckingRegistration(false)
       }
@@ -46,7 +48,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
     e.preventDefault()
 
     if (!registrationAllowed) {
-      toast.error("注册已关闭")
+      toast.error(t.auth.registrationClosed)
       return
     }
 
@@ -58,10 +60,10 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
         onRequest: () => setLoading(true),
         onResponse: () => setLoading(false),
         onError: (ctx) => {
-          toast.error(ctx.error.message || "注册失败，请重试")
+          toast.error(ctx.error.message || t.auth.signupFailed)
         },
         onSuccess: () => {
-          toast.success("注册成功")
+          toast.success(t.auth.signupSuccess)
           router.push("/")
         },
       },
@@ -90,8 +92,8 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="font-bold text-2xl">创建账户</h1>
-                <p className="text-balance text-muted-foreground">注册 MindPocket</p>
+                <h1 className="font-bold text-2xl">{t.auth.signupTitle}</h1>
+                <p className="text-balance text-muted-foreground">{t.auth.signupSubtitle}</p>
               </div>
 
               {!registrationAllowed && registrationMessage && (
@@ -101,25 +103,25 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
                     className="mt-2 inline-block text-sm underline underline-offset-4 hover:text-destructive/80"
                     href="/login"
                   >
-                    返回登录
+                    {t.auth.backToLogin}
                   </Link>
                 </div>
               )}
 
               <Field>
-                <FieldLabel htmlFor="name">姓名</FieldLabel>
+                <FieldLabel htmlFor="name">{t.auth.name}</FieldLabel>
                 <Input
                   disabled={loading || !registrationAllowed}
                   id="name"
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="张三"
+                  placeholder={t.auth.namePlaceholder}
                   required
                   type="text"
                   value={name}
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="email">邮箱</FieldLabel>
+                <FieldLabel htmlFor="email">{t.auth.email}</FieldLabel>
                 <Input
                   disabled={loading || !registrationAllowed}
                   id="email"
@@ -131,7 +133,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="password">密码</FieldLabel>
+                <FieldLabel htmlFor="password">{t.auth.password}</FieldLabel>
                 <Input
                   disabled={loading || !registrationAllowed}
                   id="password"
@@ -143,7 +145,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"div">)
               </Field>
               <Field>
                 <Button className="w-full" disabled={loading || !registrationAllowed} type="submit">
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "注册"}
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t.auth.signupButton}
                 </Button>
               </Field>
             </FieldGroup>

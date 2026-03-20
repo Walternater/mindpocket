@@ -1,4 +1,9 @@
 import { Ionicons } from "@expo/vector-icons"
+import {
+  hasPlatformIcon,
+  PLATFORM_CONFIG,
+  PlatformIcon as PlatformBrandIcon,
+} from "@repo/icons/native"
 import { useRouter } from "expo-router"
 import { useCallback, useEffect, useState } from "react"
 import {
@@ -49,8 +54,8 @@ export default function KnowledgeScreen() {
     async (offset = 0, append = false) => {
       try {
         const result = await fetchBookmarks({
-          type: activeType !== "all" ? activeType : undefined,
-          platform: activePlatform !== "all" ? activePlatform : undefined,
+          type: activeType === "all" ? undefined : activeType,
+          platform: activePlatform === "all" ? undefined : activePlatform,
           limit: 20,
           offset,
         })
@@ -274,14 +279,19 @@ function FilterChips({
       >
         {platformFilters.map((filter) => {
           const isActive = filter.value === activePlatform
+          const config = hasPlatformIcon(filter.value) ? PLATFORM_CONFIG[filter.value] : null
           return (
             <Pressable
               key={filter.value}
               onPress={() => onPlatformChange(filter.value)}
               style={[styles.filterChip, isActive && styles.filterChipActive]}
             >
-              {filter.icon && (
-                <Ionicons color={isActive ? "#fff" : "#666"} name={filter.icon} size={14} />
+              {config && (
+                <PlatformBrandIcon
+                  color={isActive ? "#fff" : config.color}
+                  platform={filter.value}
+                  size={14}
+                />
               )}
               <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
                 {filter.label}
@@ -317,6 +327,9 @@ function BookmarkRow({
   const icon = typeIconMap[item.type] || "link-outline"
   const domain = getDomain(item.url)
   const date = new Date(item.createdAt).toLocaleDateString("zh-CN")
+  const platformLabel = hasPlatformIcon(item.platform)
+    ? PLATFORM_CONFIG[item.platform].label
+    : item.platform
 
   return (
     <Pressable onPress={onPress} style={styles.row}>
@@ -326,8 +339,8 @@ function BookmarkRow({
           {item.title}
         </Text>
         <View style={styles.rowMeta}>
-          {(item.platform || domain) && (
-            <Text style={styles.rowMetaText}>{item.platform || domain}</Text>
+          {(platformLabel || domain) && (
+            <Text style={styles.rowMetaText}>{platformLabel || domain}</Text>
           )}
           <Text style={styles.rowMetaText}>{date}</Text>
         </View>

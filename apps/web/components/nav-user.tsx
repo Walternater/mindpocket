@@ -2,7 +2,7 @@
 
 import { ChevronsUpDown, LogOut, MessageCircleQuestionMark, Settings } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useId, useState } from "react"
 import { toast } from "sonner"
 
 import { SettingsDialog } from "@/components/settings/settings-dialog"
@@ -38,6 +38,7 @@ export function NavUser({
   const router = useRouter()
   const t = useT()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const triggerId = useId()
 
   return (
     <>
@@ -47,6 +48,7 @@ export function NavUser({
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                id={triggerId}
                 size="lg"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
@@ -102,7 +104,7 @@ export function NavUser({
                     router.push("/login")
                     router.refresh()
                   } catch {
-                    toast.error("退出失败，请稍后重试")
+                    toast.error(t.feedback.logoutFailed)
                   }
                 }}
               >

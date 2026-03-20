@@ -18,6 +18,7 @@
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "^5.2.8",
     "@react-navigation/native": "^7.1.28",
+    "@repo/icons": "workspace:*",
     "ai": "^6.0.77",
     "expo": "~54.0.33",
     "expo-constants": "~18.0.13",

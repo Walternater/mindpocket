@@ -46,7 +46,13 @@ interface IngestExtensionParams {
   clientSource: string
 }
 
+interface ConversionResult {
+  title: string | null
+  markdown: string
+}
+
 function sanitizeForDb(str: string): string {
+  // 清理字符串，移除控制字符，截断到 1000 字符（PostgreSQL UTF-8 兼容）
   // biome-ignore lint/suspicious/noControlCharactersInRegex: need to strip NULL bytes for PostgreSQL UTF-8 compatibility
   return str.replace(/\x00/g, "").slice(0, 1000)
 }
@@ -56,6 +62,34 @@ async function updateBookmarkStatus(bookmarkId: string, status: IngestStatus, er
     .update(bookmark)
     .set({ ingestStatus: status, ingestError: error ? sanitizeForDb(error) : null })
     .where(eq(bookmark.id, bookmarkId))
+}
+
+async function completeBookmarkIngest(params: {
+  bookmarkId: string
+  userId: string
+  result: ConversionResult
+  fallbackTitle: string
+}) {
+  const { bookmarkId, userId, result, fallbackTitle } = params
+  const finalTitle = result.title || fallbackTitle
+  const description = extractDescription(result.markdown)
+
+  await db
+    .update(bookmark)
+    .set({
+      title: finalTitle,
+      description,
+      content: result.markdown,
+      ingestStatus: "completed",
+      ingestError: null,
+    })
+    .where(eq(bookmark.id, bookmarkId))
+
+  generateAndStoreEmbeddings(bookmarkId, result.markdown, userId).catch(console.error)
+}
+
+async function failBookmarkIngest(bookmarkId: string, error: string) {
+  await updateBookmarkStatus(bookmarkId, "failed", error)
 }
 
 async function generateAndStoreEmbeddings(bookmarkId: string, content: string, userId: string) {
@@ -90,7 +124,6 @@ export async function ingestFromUrl(params: IngestUrlParams): Promise<IngestResu
     ingestStatus: "pending" as IngestStatus,
   })
 
-  // 触发后台处理，不 await
   processIngestUrl(bookmarkId, url, userId, userTitle).catch(console.error)
 
   return { bookmarkId, title: userTitle || url, markdown: null, type, status: "pending" }
@@ -105,46 +138,39 @@ async function processIngestUrl(
   await updateBookmarkStatus(bookmarkId, "processing")
   try {
     const platform = inferPlatform(url)
-    let result: { title: string | null; markdown: string } | null = null
+    let result: ConversionResult | null = null
 
     if (platform) {
       if (needsBrowser(platform)) {
-        // 需要浏览器渲染的平台
         const { fetchWithBrowser } = await import("./browser")
         const html = await fetchWithBrowser(url)
         if (html) {
           result = await convertWithPlatform(html, url, platform)
         }
       } else {
-        // 不需要浏览器的平台，直接从 URL 解析
-        // 对于 bilibili，尝试获取用户凭证
         const credentials = platform === "bilibili" ? await getBilibiliCredentials(userId) : null
         result = await convertWithoutHtml(url, platform, credentials)
       }
     }
 
-    // 无平台或平台解析失败时，走通用转换
     if (!result?.markdown) {
       result = await convertUrl(url)
     }
 
     if (!result?.markdown) {
-      await updateBookmarkStatus(bookmarkId, "failed", "Conversion returned empty result")
+      await failBookmarkIngest(bookmarkId, "Conversion returned empty result")
       return
     }
 
-    const finalTitle = userTitle || result.title || url
-    const description = extractDescription(result.markdown)
-
-    await db
-      .update(bookmark)
-      .set({ title: finalTitle, description, content: result.markdown, ingestStatus: "completed" })
-      .where(eq(bookmark.id, bookmarkId))
-
-    generateAndStoreEmbeddings(bookmarkId, result.markdown, userId).catch(console.error)
+    await completeBookmarkIngest({
+      bookmarkId,
+      userId,
+      result,
+      fallbackTitle: userTitle || url,
+    })
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : "Unknown error"
-    await updateBookmarkStatus(bookmarkId, "failed", errMsg)
+    await failBookmarkIngest(bookmarkId, errMsg)
   }
 }
 
@@ -169,7 +195,6 @@ export async function ingestFromFile(params: IngestFileParams): Promise<IngestRe
     ingestStatus: "pending" as IngestStatus,
   })
 
-  // 先读取 file 到 buffer 并上传 blob（需要在请求生命周期内完成）
   const fileBuffer = await file.arrayBuffer()
   const blobResult = await put(`ingest/${bookmarkId}/${fileName}`, fileBuffer, {
     access: "public",
@@ -180,7 +205,6 @@ export async function ingestFromFile(params: IngestFileParams): Promise<IngestRe
     .set({ fileUrl: blobResult.url, url: blobResult.url })
     .where(eq(bookmark.id, bookmarkId))
 
-  // 触发后台处理，不 await
   const buffer = Buffer.from(fileBuffer)
   processIngestFile(bookmarkId, buffer, fileExtension, userId, userTitle, fileName).catch(
     console.error
@@ -202,22 +226,19 @@ async function processIngestFile(
     const result = await convertBuffer(buffer, fileExtension)
 
     if (!result?.markdown) {
-      await updateBookmarkStatus(bookmarkId, "failed", "Conversion returned empty result")
+      await failBookmarkIngest(bookmarkId, "Conversion returned empty result")
       return
     }
 
-    const finalTitle = userTitle || result.title || fileName || "Untitled"
-    const description = extractDescription(result.markdown)
-
-    await db
-      .update(bookmark)
-      .set({ title: finalTitle, description, content: result.markdown, ingestStatus: "completed" })
-      .where(eq(bookmark.id, bookmarkId))
-
-    generateAndStoreEmbeddings(bookmarkId, result.markdown, userId).catch(console.error)
+    await completeBookmarkIngest({
+      bookmarkId,
+      userId,
+      result,
+      fallbackTitle: userTitle || fileName || "Untitled",
+    })
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : "Unknown error"
-    await updateBookmarkStatus(bookmarkId, "failed", errMsg)
+    await failBookmarkIngest(bookmarkId, errMsg)
   }
 }
 
@@ -239,7 +260,6 @@ export async function ingestFromExtension(params: IngestExtensionParams): Promis
     ingestStatus: "pending" as IngestStatus,
   })
 
-  // 触发后台处理，不 await
   processIngestExtension(bookmarkId, html, url, platform, userId, userTitle).catch(console.error)
 
   return { bookmarkId, title: userTitle || url, markdown: null, type: "article", status: "pending" }
@@ -255,19 +275,17 @@ async function processIngestExtension(
 ) {
   await updateBookmarkStatus(bookmarkId, "processing")
   try {
-    let result: { title: string | null; markdown: string } | null = null
+    let result: ConversionResult | null = null
 
     if (platform && !needsBrowser(platform)) {
-      // 对于 bilibili，尝试获取用户凭证
       const credentials = platform === "bilibili" ? await getBilibiliCredentials(userId) : null
       result = await convertWithoutHtml(url, platform, credentials)
     }
 
     if (!result) {
       if (!html) {
-        await updateBookmarkStatus(
+        await failBookmarkIngest(
           bookmarkId,
-          "failed",
           `HTML is required for platform: ${platform ?? "unknown"}`
         )
         return
@@ -276,21 +294,18 @@ async function processIngestExtension(
     }
 
     if (!result?.markdown) {
-      await updateBookmarkStatus(bookmarkId, "failed", "Conversion returned empty result")
+      await failBookmarkIngest(bookmarkId, "Conversion returned empty result")
       return
     }
 
-    const finalTitle = userTitle || result.title || url
-    const description = extractDescription(result.markdown)
-
-    await db
-      .update(bookmark)
-      .set({ title: finalTitle, description, content: result.markdown, ingestStatus: "completed" })
-      .where(eq(bookmark.id, bookmarkId))
-
-    generateAndStoreEmbeddings(bookmarkId, result.markdown, userId).catch(console.error)
+    await completeBookmarkIngest({
+      bookmarkId,
+      userId,
+      result,
+      fallbackTitle: userTitle || url,
+    })
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : "Unknown error"
-    await updateBookmarkStatus(bookmarkId, "failed", errMsg)
+    await failBookmarkIngest(bookmarkId, errMsg)
   }
 }

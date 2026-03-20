@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { useLocale, useT } from "@/lib/i18n"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 const MDPreview = dynamic(() => import("@uiw/react-md-editor").then((m) => m.default.Markdown), {
@@ -117,6 +118,7 @@ function Header({
   onEdit: () => void
   onSave: () => void
 }) {
+  const t = useT()
   return (
     <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background">
       <div className="flex flex-1 items-center gap-2 px-3">
@@ -127,7 +129,7 @@ function Header({
           href="/"
         >
           <ArrowLeft className="size-4" />
-          返回
+          {t.bookmarkDetail.back}
         </Link>
         <Separator className="mx-2 data-[orientation=vertical]:h-4" orientation="vertical" />
         <span className="line-clamp-1 flex-1 text-sm font-medium">{bookmark.title}</span>
@@ -137,7 +139,7 @@ function Header({
           <Button asChild size="sm" variant="ghost">
             <a href={bookmark.url} rel="noopener noreferrer" target="_blank">
               <ExternalLink className="mr-1 size-3.5" />
-              原始链接
+              {t.bookmarkDetail.originalLink}
             </a>
           </Button>
         )}
@@ -148,12 +150,12 @@ function Header({
             ) : (
               <Save className="mr-1 size-3.5" />
             )}
-            保存
+            {t.bookmarkDetail.save}
           </Button>
         ) : (
           <Button onClick={onEdit} size="sm" variant="outline">
             <Pencil className="mr-1 size-3.5" />
-            编辑
+            {t.bookmarkDetail.edit}
           </Button>
         )}
       </div>
@@ -161,37 +163,49 @@ function Header({
   )
 }
 
-function getSourceLabel(sourceType: string | null) {
+function getSourceLabel(
+  sourceType: string | null
+): {
+  label: "sourceWeb" | "sourceExtension" | "sourceFile"
+  icon: typeof Monitor | typeof Puzzle | typeof FileText
+} {
   switch (sourceType) {
     case "url":
-      return { label: "Web", icon: Monitor }
+      return { label: "sourceWeb", icon: Monitor }
     case "extension":
-      return { label: "Extension", icon: Puzzle }
+      return { label: "sourceExtension", icon: Puzzle }
     case "file":
-      return { label: "File", icon: FileText }
+      return { label: "sourceFile", icon: FileText }
     default:
-      return { label: "Web", icon: Monitor }
+      return { label: "sourceWeb", icon: Monitor }
   }
 }
 
-function getTypeLabel(type: string) {
+function getTypeLabel(type: string, t: ReturnType<typeof useT>) {
   switch (type) {
     case "link":
-      return "链接"
+      return t.bookmarkDetail.typeLink
     case "article":
-      return "文章"
+      return t.bookmarkDetail.typeArticle
     case "video":
-      return "视频"
+      return t.bookmarkDetail.typeVideo
     case "image":
-      return "图片"
+      return t.bookmarkDetail.typeImage
     default:
       return type
   }
 }
 
 function MetadataSection({ bookmark }: { bookmark: BookmarkDetail }) {
+  const t = useT()
+  const { locale } = useLocale()
   const source = getSourceLabel(bookmark.sourceType)
   const SourceIcon = source.icon
+  const sourceLabelMap = {
+    sourceWeb: t.bookmarkDetail.sourceWeb,
+    sourceExtension: t.bookmarkDetail.sourceExtension,
+    sourceFile: t.bookmarkDetail.sourceFile,
+  } as const
 
   return (
     <div className="space-y-5">
@@ -210,7 +224,7 @@ function MetadataSection({ bookmark }: { bookmark: BookmarkDetail }) {
           <>
             <span className="flex items-center gap-1.5 text-muted-foreground">
               <Globe className="size-3.5" />
-              平台
+              {t.bookmarkDetail.platform}
             </span>
             <span className="flex items-center gap-1.5">
               {hasPlatformIcon(bookmark.platform) ? (
@@ -226,27 +240,27 @@ function MetadataSection({ bookmark }: { bookmark: BookmarkDetail }) {
         {/* 来源 */}
         <span className="flex items-center gap-1.5 text-muted-foreground">
           <SourceIcon className="size-3.5" />
-          来源
+          {t.bookmarkDetail.source}
         </span>
         <span>
           <Badge className="text-xs" variant="outline">
-            {source.label}
+            {sourceLabelMap[source.label]}
           </Badge>
         </span>
 
         {/* 类型 */}
         <span className="flex items-center gap-1.5 text-muted-foreground">
           <FileText className="size-3.5" />
-          类型
+          {t.bookmarkDetail.type}
         </span>
-        <span>{getTypeLabel(bookmark.type)}</span>
+        <span>{getTypeLabel(bookmark.type, t)}</span>
 
         {/* 作者 */}
         {bookmark.author && (
           <>
             <span className="flex items-center gap-1.5 text-muted-foreground">
               <User className="size-3.5" />
-              作者
+              {t.bookmarkDetail.author}
             </span>
             <span>{bookmark.author}</span>
           </>
@@ -257,7 +271,7 @@ function MetadataSection({ bookmark }: { bookmark: BookmarkDetail }) {
           <>
             <span className="flex items-center gap-1.5 text-muted-foreground">
               <FolderOpen className="size-3.5" />
-              文件夹
+              {t.bookmarkDetail.folder}
             </span>
             <span className="flex items-center gap-1.5">
               <span>{bookmark.folderEmoji || "📁"}</span>
@@ -269,10 +283,10 @@ function MetadataSection({ bookmark }: { bookmark: BookmarkDetail }) {
         {/* 收藏时间 */}
         <span className="flex items-center gap-1.5 text-muted-foreground">
           <Calendar className="size-3.5" />
-          收藏时间
+          {t.bookmarkDetail.savedAt}
         </span>
         <span>
-          {new Date(bookmark.createdAt).toLocaleDateString("zh-CN", {
+          {new Date(bookmark.createdAt).toLocaleDateString(locale === "zh" ? "zh-CN" : "en", {
             year: "numeric",
             month: "long",
             day: "numeric",
@@ -284,10 +298,10 @@ function MetadataSection({ bookmark }: { bookmark: BookmarkDetail }) {
           <>
             <span className="flex items-center gap-1.5 text-muted-foreground">
               <Calendar className="size-3.5" />
-              发布时间
+              {t.bookmarkDetail.publishedAt}
             </span>
             <span>
-              {new Date(bookmark.sourceCreatedAt).toLocaleDateString("zh-CN", {
+              {new Date(bookmark.sourceCreatedAt).toLocaleDateString(locale === "zh" ? "zh-CN" : "en", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
@@ -301,7 +315,7 @@ function MetadataSection({ bookmark }: { bookmark: BookmarkDetail }) {
           <>
             <span className="flex items-center gap-1.5 text-muted-foreground">
               <Tag className="size-3.5" />
-              标签
+              {t.bookmarkDetail.tags}
             </span>
             <div className="flex flex-wrap gap-1.5">
               {bookmark.tags.map((tag) => (
@@ -326,10 +340,11 @@ function ContentSection({
   isEditing: boolean
   onContentChange: (v: string) => void
 }) {
+  const t = useT()
   if (!(content || isEditing)) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <p>暂无内容</p>
+        <p>{t.bookmarkDetail.noContent}</p>
       </div>
     )
   }

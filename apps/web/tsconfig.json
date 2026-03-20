@@ -4,7 +4,11 @@
     "plugins": [{ "name": "next" }],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@repo/i18n": ["../../packages/i18n/src/index.ts"],
+      "@repo/i18n/*": ["../../packages/i18n/src/*"],
+      "@repo/icons": ["../../packages/icons/src/index.ts"],
+      "@repo/icons/*": ["../../packages/icons/src/*"]
     },
     "strictNullChecks": true
   },

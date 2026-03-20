@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { useT } from "@/lib/i18n"
 
 interface DashboardData {
   totalBookmarks: number
@@ -25,6 +26,7 @@ interface DashboardData {
 }
 
 export default function DashboardPage() {
+  const t = useT()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [days, setDays] = useState(30)
@@ -61,7 +63,7 @@ export default function DashboardPage() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage className="line-clamp-1">数据看板</BreadcrumbPage>
+                <BreadcrumbPage className="line-clamp-1">{t.dashboard.title}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -90,12 +92,13 @@ function DashboardContent({
   loading: boolean
   onDaysChange: (d: number) => void
 }) {
+  const t = useT()
   if (loading && !data) {
     return <DashboardSkeleton />
   }
 
   if (!data) {
-    return <p className="text-muted-foreground text-center">暂无数据</p>
+    return <p className="text-muted-foreground text-center">{t.dashboard.empty}</p>
   }
 
   return (

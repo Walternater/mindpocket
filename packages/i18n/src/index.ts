@@ -1,0 +1,5 @@
+export type { Locale } from "./shared"
+export { getSiteDictionary, siteDictionaries } from "./site"
+export type { SiteTranslationDict } from "./site"
+export { getWebDictionary, webDictionaries } from "./web"
+export type { WebTranslationDict } from "./web"

@@ -8,6 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { useLocale, useT } from "@/lib/i18n"
 
 interface GrowthChartProps {
   data: Array<{ date: string; count: number }>
@@ -15,27 +16,28 @@ interface GrowthChartProps {
   onDaysChange: (days: number) => void
 }
 
-const chartConfig = {
-  count: {
-    label: "收藏数",
-    color: "hsl(var(--chart-1))",
-  },
-} satisfies ChartConfig
-
-const dayOptions = [
-  { label: "7天", value: 7 },
-  { label: "30天", value: 30 },
-  { label: "90天", value: 90 },
-]
-
 export function GrowthChart({ data, days, onDaysChange }: GrowthChartProps) {
+  const t = useT()
+  const { locale } = useLocale()
+  const chartConfig = {
+    count: {
+      label: t.dashboard.chartCount,
+      color: "hsl(var(--chart-1))",
+    },
+  } satisfies ChartConfig
+  const dayOptions = [
+    { label: t.dashboard.day7, value: 7 },
+    { label: t.dashboard.day30, value: 30 },
+    { label: t.dashboard.day90, value: 90 },
+  ]
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>收藏增长趋势</CardTitle>
-            <CardDescription>每日新增收藏数量</CardDescription>
+            <CardTitle>{t.dashboard.growthTitle}</CardTitle>
+            <CardDescription>{t.dashboard.growthDescription}</CardDescription>
           </div>
           <div className="flex gap-1">
             {dayOptions.map((opt) => (
@@ -73,7 +75,7 @@ export function GrowthChart({ data, days, onDaysChange }: GrowthChartProps) {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value: string) => {
-                    return new Date(value).toLocaleDateString("zh-CN")
+                    return new Date(value).toLocaleDateString(locale === "zh" ? "zh-CN" : "en")
                   }}
                 />
               }

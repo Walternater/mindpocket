@@ -8,8 +8,10 @@ import {
 } from "@/components/ai-elements/conversation"
 import { Shimmer } from "@/components/ai-elements/shimmer"
 import { ChatMessage } from "@/components/chat-message"
+import { useT } from "@/lib/i18n"
 
 export function ChatMessages({ messages, status }: { messages: UIMessage[]; status: ChatStatus }) {
+  const t = useT()
   const isStreaming = status === "streaming" || status === "submitted"
 
   return (
@@ -27,7 +29,7 @@ export function ChatMessages({ messages, status }: { messages: UIMessage[]; stat
         })}
         {status === "submitted" && messages.at(-1)?.role !== "assistant" && (
           <div className="text-muted-foreground text-sm">
-            <Shimmer duration={1}>思考中...</Shimmer>
+            <Shimmer duration={1}>{t.chatMessages.thinking}</Shimmer>
           </div>
         )}
       </ConversationContent>

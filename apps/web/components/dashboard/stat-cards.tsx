@@ -2,6 +2,7 @@
 
 import { Bookmark, BrainCircuit, MessageSquare, TrendingUp } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useT } from "@/lib/i18n"
 
 interface StatCardsProps {
   totalBookmarks: number
@@ -16,30 +17,31 @@ export function StatCards({
   totalChats,
   embeddingRate,
 }: StatCardsProps) {
+  const t = useT()
   const cards = [
     {
-      title: "总收藏",
+      title: t.dashboard.totalBookmarks,
       value: totalBookmarks,
       icon: Bookmark,
-      description: "所有收藏内容",
+      description: t.dashboard.totalBookmarksDescription,
     },
     {
-      title: "本周新增",
+      title: t.dashboard.weekBookmarks,
       value: weekBookmarks,
       icon: TrendingUp,
-      description: "最近 7 天",
+      description: t.dashboard.weekBookmarksDescription,
     },
     {
-      title: "AI 对话",
+      title: t.dashboard.totalChats,
       value: totalChats,
       icon: MessageSquare,
-      description: "对话总数",
+      description: t.dashboard.totalChatsDescription,
     },
     {
-      title: "向量化率",
+      title: t.dashboard.embeddingRate,
       value: `${embeddingRate}%`,
       icon: BrainCircuit,
-      description: "内容已向量化",
+      description: t.dashboard.embeddingRateDescription,
     },
   ]
 

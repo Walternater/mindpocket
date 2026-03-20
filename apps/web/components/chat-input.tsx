@@ -25,6 +25,7 @@ import {
   usePromptInputAttachments,
 } from "@/components/ai-elements/prompt-input"
 import { ChatModelSelector } from "@/components/chat-model-selector"
+import { useT } from "@/lib/i18n"
 
 function AttachmentPreviewList() {
   const { files, remove } = usePromptInputAttachments()
@@ -72,6 +73,7 @@ export function ChatInput({
   useFolderTools: boolean
   onFolderToolsChange: (value: boolean) => void
 }) {
+  const t = useT()
   return (
     <div className="w-full px-4 pb-4">
       <PromptInput accept="image/*" multiple onSubmit={onSubmit}>
@@ -79,7 +81,7 @@ export function ChatInput({
         <PromptInputBody>
           <PromptInputTextarea
             onChange={(e) => setInput(e.target.value)}
-            placeholder="输入消息..."
+            placeholder={t.chatInput.placeholder}
             value={input}
           />
         </PromptInputBody>
@@ -88,7 +90,7 @@ export function ChatInput({
             <PromptInputActionMenu>
               <PromptInputActionMenuTrigger />
               <PromptInputActionMenuContent>
-                <PromptInputActionAddAttachments label="添加图片" />
+                <PromptInputActionAddAttachments label={t.chatInput.addImage} />
               </PromptInputActionMenuContent>
             </PromptInputActionMenu>
             <ChatModelSelector onModelChange={onModelChange} selectedModelId={selectedModelId} />
@@ -96,19 +98,19 @@ export function ChatInput({
               className={useFolderTools ? "bg-primary/10 text-primary" : ""}
               onClick={() => onFolderToolsChange(!useFolderTools)}
               size="sm"
-              tooltip="文件夹工具"
+              tooltip={t.chatInput.folderTools}
             >
               <FolderTree className="size-4" />
-              <span className="text-xs">文件夹工具</span>
+              <span className="text-xs">{t.chatInput.folderTools}</span>
             </PromptInputButton>
             <PromptInputButton
               className={useKnowledgeBase ? "bg-primary/10 text-primary" : ""}
               onClick={() => onKnowledgeBaseChange(!useKnowledgeBase)}
               size="sm"
-              tooltip="知识库"
+              tooltip={t.chatInput.knowledgeBase}
             >
               <BookOpen className="size-4" />
-              <span className="text-xs">知识库</span>
+              <span className="text-xs">{t.chatInput.knowledgeBase}</span>
             </PromptInputButton>
           </PromptInputTools>
           <PromptInputSubmit onStop={stop} status={status} />

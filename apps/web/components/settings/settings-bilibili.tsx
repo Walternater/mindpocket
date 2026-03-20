@@ -6,8 +6,10 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useT } from "@/lib/i18n"
 
 export function SettingsBilibili() {
+  const t = useT()
   const [hasCredentials, setHasCredentials] = useState(false)
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -35,7 +37,7 @@ export function SettingsBilibili() {
 
   const handleTest = async () => {
     if (!(sessdata && biliJct && buvid3)) {
-      toast.error("请填写所有字段")
+      toast.error(t.settingsBilibili.fillAllFields)
       return
     }
 
@@ -50,12 +52,12 @@ export function SettingsBilibili() {
       const data = await res.json()
 
       if (data.valid) {
-        toast.success("凭证验证成功！")
+        toast.success(t.settingsBilibili.testSuccess)
       } else {
-        toast.error("凭证无效", { description: data.error || data.details })
+        toast.error(t.settingsBilibili.invalidCredentials, { description: data.error || data.details })
       }
     } catch {
-      toast.error("测试失败，请检查网络连接")
+      toast.error(t.settingsBilibili.testFailed)
     } finally {
       setTesting(false)
     }
@@ -63,7 +65,7 @@ export function SettingsBilibili() {
 
   const handleSave = async () => {
     if (!(sessdata && biliJct && buvid3)) {
-      toast.error("请填写所有字段")
+      toast.error(t.settingsBilibili.fillAllFields)
       return
     }
 
@@ -76,7 +78,7 @@ export function SettingsBilibili() {
       })
 
       if (res.ok) {
-        toast.success("凭证保存成功！")
+        toast.success(t.settingsBilibili.saveSuccess)
         setShowForm(false)
         setSessdata("")
         setBiliJct("")
@@ -84,10 +86,10 @@ export function SettingsBilibili() {
         await fetchStatus()
       } else {
         const data = await res.json()
-        toast.error(data.error || "保存失败")
+        toast.error(data.error || t.settingsBilibili.saveFailed)
       }
     } catch {
-      toast.error("保存失败，请检查网络连接")
+      toast.error(t.settingsBilibili.saveNetworkFailed)
     } finally {
       setSaving(false)
     }
@@ -101,14 +103,14 @@ export function SettingsBilibili() {
       })
 
       if (res.ok) {
-        toast.success("凭证已删除")
+        toast.success(t.settingsBilibili.deleteSuccess)
         await fetchStatus()
       } else {
         const data = await res.json()
-        toast.error(data.error || "删除失败")
+        toast.error(data.error || t.settingsBilibili.deleteFailed)
       }
     } catch {
-      toast.error("删除失败，请检查网络连接")
+      toast.error(t.settingsBilibili.deleteNetworkFailed)
     } finally {
       setSaving(false)
     }
@@ -132,23 +134,23 @@ export function SettingsBilibili() {
   return (
     <div className="space-y-6">
       <section>
-        <h3 className="mb-3 font-medium text-sm">Bilibili 字幕提取</h3>
+        <h3 className="mb-3 font-medium text-sm">{t.settingsBilibili.title}</h3>
         <p className="mb-4 text-muted-foreground text-xs">
-          配置 Bilibili 登录凭证后，系统会自动为 B 站视频提取字幕内容
+          {t.settingsBilibili.description}
         </p>
 
         {hasCredentials && !showForm && (
           <div className="flex items-center justify-between rounded-lg border px-3 py-2">
             <div className="flex items-center gap-2">
               <Check className="size-4 text-green-600" />
-              <span className="text-sm">已配置 Bilibili 凭证</span>
+              <span className="text-sm">{t.settingsBilibili.configured}</span>
             </div>
             <div className="flex gap-2">
               <Button onClick={() => setShowForm(true)} size="sm" variant="outline">
-                更新
+                {t.settingsBilibili.update}
               </Button>
               <Button disabled={saving} onClick={handleDelete} size="sm" variant="destructive">
-                删除
+                {t.settingsBilibili.delete}
               </Button>
             </div>
           </div>
@@ -157,7 +159,11 @@ export function SettingsBilibili() {
         {(!hasCredentials || showForm) && (
           <div className="space-y-3 rounded-lg border p-4">
             <div className="flex items-center justify-between">
-              <h4 className="font-medium text-sm">{hasCredentials ? "更新凭证" : "配置凭证"}</h4>
+              <h4 className="font-medium text-sm">
+                {hasCredentials
+                  ? t.settingsBilibili.updateCredentials
+                  : t.settingsBilibili.configureCredentials}
+              </h4>
               {showForm && (
                 <Button onClick={handleCancel} size="sm" variant="ghost">
                   <X className="size-4" />
@@ -166,12 +172,12 @@ export function SettingsBilibili() {
             </div>
 
             <div className="space-y-1.5 rounded-md bg-blue-50 p-3 dark:bg-blue-950">
-              <p className="font-medium text-xs">如何获取 Cookie？</p>
+              <p className="font-medium text-xs">{t.settingsBilibili.howToGetCookie}</p>
               <ol className="list-decimal list-inside space-y-0.5 text-xs">
-                <li>登录 bilibili.com</li>
-                <li>按 F12 打开开发者工具</li>
-                <li>进入 Application → Cookies</li>
-                <li>复制以下三个值：</li>
+                <li>{t.settingsBilibili.step1}</li>
+                <li>{t.settingsBilibili.step2}</li>
+                <li>{t.settingsBilibili.step3}</li>
+                <li>{t.settingsBilibili.step4}</li>
               </ol>
               <ul className="list-disc list-inside ml-4 text-xs">
                 <li>
@@ -190,7 +196,7 @@ export function SettingsBilibili() {
               <Label className="text-xs">SESSDATA</Label>
               <Input
                 onChange={(e) => setSessdata(e.target.value)}
-                placeholder="输入 SESSDATA"
+                placeholder={t.settingsBilibili.sessdataPlaceholder}
                 type="password"
                 value={sessdata}
               />
@@ -200,7 +206,7 @@ export function SettingsBilibili() {
               <Label className="text-xs">bili_jct</Label>
               <Input
                 onChange={(e) => setBiliJct(e.target.value)}
-                placeholder="输入 bili_jct"
+                placeholder={t.settingsBilibili.biliJctPlaceholder}
                 type="password"
                 value={biliJct}
               />
@@ -210,7 +216,7 @@ export function SettingsBilibili() {
               <Label className="text-xs">buvid3</Label>
               <Input
                 onChange={(e) => setBuvid3(e.target.value)}
-                placeholder="输入 buvid3"
+                placeholder={t.settingsBilibili.buvid3Placeholder}
                 type="text"
                 value={buvid3}
               />
@@ -219,15 +225,15 @@ export function SettingsBilibili() {
             <div className="flex gap-2 pt-1">
               <Button disabled={testing || saving} onClick={handleTest} size="sm" variant="outline">
                 {testing && <Loader2 className="mr-1 size-3 animate-spin" />}
-                测试
+                {t.settingsBilibili.test}
               </Button>
               <Button disabled={saving || testing} onClick={handleSave} size="sm">
                 {saving && <Loader2 className="mr-1 size-3 animate-spin" />}
-                保存
+                {t.settingsBilibili.save}
               </Button>
               {showForm && (
                 <Button onClick={handleCancel} size="sm" variant="outline">
-                  取消
+                  {t.settingsBilibili.cancel}
                 </Button>
               )}
             </div>
@@ -237,8 +243,8 @@ export function SettingsBilibili() {
 
       <section className="rounded-md border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-950">
         <p className="text-xs">
-          <strong>注意：</strong>凭证将被加密存储。Cookie
-          有过期时间，如果字幕提取失败，请尝试更新凭证。
+          <strong>{t.settingsBilibili.noteLabel}</strong>
+          {t.settingsBilibili.noteContent}
         </p>
       </section>
     </div>

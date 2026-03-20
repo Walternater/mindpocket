@@ -9,18 +9,10 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { useT } from "@/lib/i18n"
 
 interface TypeDistributionProps {
   data: Array<{ type: string; count: number }>
-}
-
-const typeLabels: Record<string, string> = {
-  link: "链接",
-  text: "文字",
-  image: "图片",
-  video: "视频",
-  audio: "音频",
-  pdf: "PDF",
 }
 
 const typeColors: Record<string, string> = {
@@ -33,7 +25,16 @@ const typeColors: Record<string, string> = {
 }
 
 export function TypeDistribution({ data }: TypeDistributionProps) {
+  const t = useT()
   const total = useMemo(() => data.reduce((sum, item) => sum + item.count, 0), [data])
+  const typeLabels: Record<string, string> = {
+    link: t.bookmarkList.typeLink,
+    text: t.dashboard.typeText,
+    image: t.bookmarkList.typeImage,
+    video: t.bookmarkList.typeVideo,
+    audio: t.dashboard.typeAudio,
+    pdf: t.dashboard.typePdf,
+  }
 
   const chartConfig = useMemo(() => {
     const config: ChartConfig = {}
@@ -44,7 +45,7 @@ export function TypeDistribution({ data }: TypeDistributionProps) {
       }
     }
     return config
-  }, [data])
+  }, [data, typeLabels])
 
   const chartData = useMemo(
     () => data.map((item) => ({ ...item, fill: `var(--color-${item.type})` })),
@@ -54,8 +55,8 @@ export function TypeDistribution({ data }: TypeDistributionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>内容类型分布</CardTitle>
-        <CardDescription>按收藏类型统计</CardDescription>
+        <CardTitle>{t.dashboard.typeDistributionTitle}</CardTitle>
+        <CardDescription>{t.dashboard.typeDistributionDescription}</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer className="mx-auto h-[250px]" config={chartConfig}>
@@ -84,7 +85,7 @@ export function TypeDistribution({ data }: TypeDistributionProps) {
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                         >
-                          总收藏
+                          {t.dashboard.totalCenterLabel}
                         </tspan>
                       </text>
                     )

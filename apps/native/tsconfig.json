@@ -5,6 +5,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
+      "@repo/icons": ["../../packages/icons/src/index.ts"],
+      "@repo/icons/*": ["../../packages/icons/src/*"],
       "@repo/types": ["../../packages/types/src/index.ts"],
       "@repo/types/*": ["../../packages/types/src/*"]
     }

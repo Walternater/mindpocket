@@ -1,3 +1,4 @@
+import { detectPlatform, hasPlatformIcon, PLATFORM_CONFIG } from "@repo/icons/web"
 import { useEffect, useState } from "react"
 import {
   getCachedUser,
@@ -9,7 +10,6 @@ import {
   signIn,
   signOut,
 } from "../../lib/auth-client"
-import { detectPlatform, PLATFORM_CONFIG } from "../../lib/platform-icons"
 import "./App.css"
 
 interface User {
@@ -228,13 +228,13 @@ function SavePage({
       <p className="user-info">{user.email}</p>
       {pageInfo && (
         <div className="page-info">
-          {pageInfo.platform && PLATFORM_CONFIG[pageInfo.platform] ? (
+          {hasPlatformIcon(pageInfo.platform) ? (
             (() => {
               const config = PLATFORM_CONFIG[pageInfo.platform]
               const Icon = config.icon
               return (
                 <span className="platform-badge">
-                  <Icon style={{ width: 14, height: 14, color: config.color }} />
+                  <Icon style={{ width: 14, height: 14, color: config.colorHex }} />
                   <span>{config.label}</span>
                 </span>
               )

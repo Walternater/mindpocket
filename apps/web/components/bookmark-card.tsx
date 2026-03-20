@@ -44,7 +44,11 @@ function getDomain(url: string | null) {
   }
 }
 
-function getRelativeTime(dateStr: string) {
+function formatTemplate(template: string, count: number) {
+  return template.replace("{count}", String(count))
+}
+
+function getRelativeTime(dateStr: string, t: ReturnType<typeof useT>) {
   const now = Date.now()
   const date = new Date(dateStr).getTime()
   const diff = now - date
@@ -55,21 +59,21 @@ function getRelativeTime(dateStr: string) {
   const months = Math.floor(days / 30)
 
   if (minutes < 1) {
-    return "刚刚"
+    return t.bookmarkList.justNow
   }
   if (minutes < 60) {
-    return `${minutes}分钟前`
+    return formatTemplate(t.bookmarkList.minutesAgo, minutes)
   }
   if (hours < 24) {
-    return `${hours}小时前`
+    return formatTemplate(t.bookmarkList.hoursAgo, hours)
   }
   if (days < 7) {
-    return `${days}天前`
+    return formatTemplate(t.bookmarkList.daysAgo, days)
   }
   if (weeks < 5) {
-    return `${weeks}周前`
+    return formatTemplate(t.bookmarkList.weeksAgo, weeks)
   }
-  return `${months}个月前`
+  return formatTemplate(t.bookmarkList.monthsAgo, months)
 }
 
 function getGradientFromUrl(url: string | null) {
@@ -200,7 +204,7 @@ export function BookmarkCard({ item }: { item: BookmarkItem }) {
           </div>
 
           <div className="flex items-center justify-between text-muted-foreground text-xs">
-            <span>{getRelativeTime(item.createdAt)}</span>
+            <span>{getRelativeTime(item.createdAt, t)}</span>
             {item.isFavorite && <Heart className="size-3 fill-red-500 text-red-500" />}
           </div>
         </div>
