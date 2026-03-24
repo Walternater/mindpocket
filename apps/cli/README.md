@@ -103,6 +103,18 @@ mindpocket doctor
 npm install -g mindpocket@latest
 ```
 
+Advanced agent users can also install the repository skill that wraps this CLI workflow guidance:
+
+```bash
+npx skills add https://github.com/jihe520/mindpocket --skill mindpocket
+```
+
+For local testing from a repository checkout:
+
+```bash
+npx skills add ./skills/mindpocket
+```
+
 ## Uninstall
 
 ```bash

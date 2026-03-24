@@ -49,12 +49,12 @@ export async function doctorCommand(options: { server?: string }) {
     const session = await client.request<{
       session: { expiresAt: string } | null
       user: { id: string; email: string; name: string } | null
-    }>("/api/auth/get-session")
+    } | null>("/api/auth/get-session")
 
     reachable = true
-    authenticated = Boolean(session.session && session.user)
-    user = session.user
-    expiresAt = session.session?.expiresAt || expiresAt
+    authenticated = Boolean(session?.session && session.user)
+    user = session?.user || null
+    expiresAt = session?.session?.expiresAt || expiresAt
     sessionInvalid = hasStoredSession && !authenticated
   } catch (error) {
     if (error instanceof CliError && error.code === "AUTH_REQUIRED") {

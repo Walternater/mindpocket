@@ -195,6 +195,31 @@ mindpocket doctor
 mindpocket auth login --no-open
 ```
 
+### Agent Skill
+
+MindPocket also ships a repository-scoped agent skill named `mindpocket`. The skill teaches compatible agents to discover commands with `schema`, verify readiness with `doctor`, configure the server, handle auth safely, and operate bookmark and folder workflows through the published CLI.
+
+Install it with `skills.sh` from this repository:
+
+```bash
+npx skills add https://github.com/jihe520/mindpocket --skill mindpocket
+```
+
+For local testing from a checkout:
+
+```bash
+npx skills add ./skills/mindpocket
+```
+
+The skill is procedural guidance layered on top of the npm CLI, so users still need the `mindpocket` command available locally.
+
+Example prompts:
+
+```text
+Use the `mindpocket` skill to list my latest 10 bookmarks.
+Use the `mindpocket` skill to help me configure my server and log in.
+```
+
 ## 🛠 Tech Stack
 
 | Category | Technologies |
