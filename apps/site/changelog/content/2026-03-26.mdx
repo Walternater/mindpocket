@@ -1,0 +1,46 @@
+---
+title: "CLI Login, Public Docs, and Better Extension Controls"
+description: "Added browser-based CLI sign-in, launched a searchable public docs hub, and improved extension controls for smoother capture workflows."
+date: "2026-03-26"
+tags: ["CLI", "Docs", "Extension", "Automation", "UX"]
+version: "3.1"
+---
+
+- **Browser-based CLI sign-in** with device approval makes it much easier to connect local tools to your MindPocket account.
+- **Agent-ready CLI workflows** now cover more everyday operations, making automation and scripting practical instead of experimental.
+- **Public docs with search** gives new users a clearer path to setup, deployment, and ingestion architecture.
+- **Clearer extension controls** reduce friction when switching capture behavior and checking sign-in state.
+- **Higher reliability across auth and API flows** improves confidence when using MindPocket from scripts, tests, and multi-step workflows.
+
+<Accordion type="multiple" collapsible className="w-full not-prose">
+  <AccordionItem value="features">
+    <AccordionTrigger>Features</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <ul className="list-disc space-y-2 pl-4">
+        <li>Added CLI login with a browser handoff and device approval flow, so you can authenticate local tools without manually copying session data.</li>
+        <li>Expanded the CLI with more scriptable commands for health checks, schema inspection, bookmark updates, and folder lookups.</li>
+        <li>Launched a public documentation section with search, onboarding guides, deployment steps, and ingestion architecture notes.</li>
+      </ul>
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="improvements">
+    <AccordionTrigger>Improvements</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <ul className="list-disc space-y-2 pl-4">
+        <li>Refined the CLI network runtime so login and authenticated requests behave more predictably across different local environments.</li>
+        <li>Improved the browser extension popup and content controls to make platform-specific capture options easier to understand and adjust.</li>
+        <li>Renamed the extension package to a clearer project-facing name, reducing confusion when working across the monorepo.</li>
+      </ul>
+    </AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="fixes">
+    <AccordionTrigger>Fixes</AccordionTrigger>
+    <AccordionContent className="flex flex-col gap-4 text-balance">
+      <ul className="list-disc space-y-2 pl-4">
+        <li>Added broader web API and auth test coverage to catch regressions earlier in bookmark, folder, and login flows.</li>
+        <li>Resolved a round of lint and typing issues that were affecting stability across the CLI, site, extension, and shared i18n code.</li>
+        <li>Wrapped auth pages more safely and cleaned up test environment setup to reduce edge-case failures during development.</li>
+      </ul>
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>
