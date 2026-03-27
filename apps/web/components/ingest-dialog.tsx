@@ -238,7 +238,12 @@ export function IngestDialog({ folders = [], onSuccess, trigger }: IngestDialogP
               />
             </div>
 
-            <FolderSelect disabled={isProcessing} folderId={folderId} folders={folders} onFolderChange={setFolderId} />
+            <FolderSelect
+              disabled={isProcessing}
+              folderId={folderId}
+              folders={folders}
+              onFolderChange={setFolderId}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="title-url">{t.ingestDialog.titleLabel}</Label>
@@ -300,7 +305,7 @@ export function IngestDialog({ folders = [], onSuccess, trigger }: IngestDialogP
                     {formatFileSize(selectedFile.size)}
                   </p>
                 </>
-                ) : (
+              ) : (
                 <>
                   <Upload className="size-8 text-muted-foreground/50" />
                   <p className="text-muted-foreground text-sm">{t.ingestDialog.dropzoneTitle}</p>
@@ -311,7 +316,12 @@ export function IngestDialog({ folders = [], onSuccess, trigger }: IngestDialogP
               )}
             </div>
 
-            <FolderSelect disabled={isProcessing} folderId={folderId} folders={folders} onFolderChange={setFolderId} />
+            <FolderSelect
+              disabled={isProcessing}
+              folderId={folderId}
+              folders={folders}
+              onFolderChange={setFolderId}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="title-file">{t.ingestDialog.titleLabel}</Label>

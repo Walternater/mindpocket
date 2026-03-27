@@ -63,6 +63,7 @@ export function renderRootHelp() {
       "Agent tips:",
       "  stdout uses JSON for normal command results.",
       "  stderr carries login instructions and diagnostics.",
+      "  HTTP_PROXY, HTTPS_PROXY, and NO_PROXY are honored for outbound requests.",
       "  Use `mindpocket schema` to discover commands and arguments programmatically.",
       "  Use `mindpocket doctor` to inspect readiness before running protected commands.",
       "  Use `mindpocket auth login --device-code-only` in non-interactive orchestration flows.",

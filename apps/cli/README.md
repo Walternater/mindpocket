@@ -4,7 +4,7 @@ MindPocket CLI is a JSON-first command line client for agents, scripts, and deve
 
 ## Requirements
 
-- Node.js 18 or newer
+- Node.js 18.17 or newer
 
 ## Install
 
@@ -45,6 +45,28 @@ For remote shells or orchestrators:
 
 - `mindpocket auth login --no-open` keeps the flow non-interactive on the local machine
 - `mindpocket auth login --device-code-only` returns the device flow payload without polling
+
+## Proxy Support
+
+MindPocket CLI honors standard proxy environment variables for outbound requests:
+
+- `HTTP_PROXY`
+- `HTTPS_PROXY`
+- `NO_PROXY`
+
+Lowercase variants such as `http_proxy`, `https_proxy`, and `no_proxy` also work.
+
+Example:
+
+```bash
+export HTTPS_PROXY=http://127.0.0.1:7890
+export HTTP_PROXY=http://127.0.0.1:7890
+mindpocket ping
+mindpocket auth login
+mindpocket bookmarks list
+```
+
+`ALL_PROXY` / SOCKS proxy configuration is not explicitly supported by the CLI.
 
 ## Common Commands
 

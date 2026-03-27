@@ -21,6 +21,7 @@ export const HeroHeader = ({ previewMode, onPreviewModeChange }: HeroHeaderProps
 
   const menuItems = [
     { name: t.nav.features, href: "/" },
+    { name: t.nav.docs, href: "/docs" },
     { name: t.nav.solutions, href: "/price" },
     { name: t.nav.changelog, href: "/changelog" },
     { name: t.nav.platform, href: "#link" },
@@ -43,7 +44,7 @@ export const HeroHeader = ({ previewMode, onPreviewModeChange }: HeroHeaderProps
             isScrolled && "bg-background/50 max-w-4xl rounded-2xl border backdrop-blur-lg lg:px-5"
           )}
         >
-          <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
+          <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:flex-nowrap lg:gap-4 lg:py-4">
             <div className="flex w-full justify-between lg:w-auto">
               <Link aria-label="home" className="flex items-center space-x-2" href="/">
                 <Logo />
@@ -60,7 +61,7 @@ export const HeroHeader = ({ previewMode, onPreviewModeChange }: HeroHeaderProps
               </button>
             </div>
 
-            <div className="absolute inset-0 m-auto hidden size-fit items-center gap-6 lg:flex">
+            <div className="hidden items-center justify-center gap-6 lg:flex lg:flex-1">
               <ul className="flex gap-6 text-sm">
                 {menuItems.map((item) => (
                   <li key={`${item.name}-${item.href}`}>
@@ -101,7 +102,7 @@ export const HeroHeader = ({ previewMode, onPreviewModeChange }: HeroHeaderProps
               </div>
             </div>
 
-            <div className="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:flex lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
+            <div className="bg-background in-data-[state=active]:block lg:in-data-[state=active]:flex mb-6 hidden w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:ml-auto lg:m-0 lg:flex lg:w-fit lg:flex-none lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent">
               <div className="lg:hidden">
                 <ul className="space-y-6 text-base">
                   {menuItems.map((item) => (

@@ -3,6 +3,7 @@ import type { DeepTranslationRecord, Locale } from "./shared"
 const zh = {
   nav: {
     features: "功能",
+    docs: "文档",
     solutions: "价格",
     platform: "多端",
     roadmap: "路线图",
@@ -141,6 +142,7 @@ export type SiteTranslationDict = DeepTranslationRecord<typeof zh>
 const en: SiteTranslationDict = {
   nav: {
     features: "Features",
+    docs: "Docs",
     solutions: "Pricing",
     platform: "Platform",
     roadmap: "Roadmap",

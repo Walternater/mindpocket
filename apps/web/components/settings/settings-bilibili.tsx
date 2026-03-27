@@ -54,7 +54,9 @@ export function SettingsBilibili() {
       if (data.valid) {
         toast.success(t.settingsBilibili.testSuccess)
       } else {
-        toast.error(t.settingsBilibili.invalidCredentials, { description: data.error || data.details })
+        toast.error(t.settingsBilibili.invalidCredentials, {
+          description: data.error || data.details,
+        })
       }
     } catch {
       toast.error(t.settingsBilibili.testFailed)
@@ -135,9 +137,7 @@ export function SettingsBilibili() {
     <div className="space-y-6">
       <section>
         <h3 className="mb-3 font-medium text-sm">{t.settingsBilibili.title}</h3>
-        <p className="mb-4 text-muted-foreground text-xs">
-          {t.settingsBilibili.description}
-        </p>
+        <p className="mb-4 text-muted-foreground text-xs">{t.settingsBilibili.description}</p>
 
         {hasCredentials && !showForm && (
           <div className="flex items-center justify-between rounded-lg border px-3 py-2">

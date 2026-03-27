@@ -1,0 +1,54 @@
+---
+title: Ingest 架构
+description: MindPocket 如何接收 URL、文件和扩展上传内容，并转换为可搜索的 Markdown。
+---
+
+# Ingest 架构
+
+MindPocket 的 Ingest 流程负责把外部内容统一转成结构化 Markdown，再进入存储和向量化阶段。
+
+## 输入类型
+
+当前系统主要处理三类输入：
+
+| 类型 | 来源 | 特点 |
+| --- | --- | --- |
+| URL | Web / Mobile | 适合分享链接或手动导入 |
+| 文件 | Web / Mobile | 适合 PDF、Word 等附件 |
+| 扩展数据 | Browser Extension | 可以上传更完整的页面上下文 |
+
+## 核心流程
+
+1. 创建一条状态为 `pending` 的 Bookmark 记录
+2. 根据输入类型选择对应处理器
+3. 将原始内容转换为 Markdown
+4. 更新结构化内容与状态
+5. 异步生成 embedding，供后续 AI 检索使用
+
+## 平台识别
+
+系统会先尝试识别已知平台，例如：
+
+- Bilibili
+- 微信公众号
+- 小红书
+- 通用网页
+
+不同平台会采用不同的抓取或转换策略，尽量在可维护性和成功率之间保持平衡。
+
+## 为什么统一成 Markdown
+
+统一内容格式有几个直接收益：
+
+- 便于全文检索
+- 便于后续摘要和标签生成
+- 便于 embedding 分块
+- 便于多端展示
+
+## 相关实现
+
+如果你需要查看当前仓库里的实现入口，可以从这些位置开始：
+
+- `apps/web/app/api/ingest/route.ts`
+- `apps/web/lib/ingest/pipeline.ts`
+- `apps/web/lib/ingest/platforms/*`

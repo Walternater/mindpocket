@@ -1,10 +1,6 @@
 "use client"
 
-import {
-  getSiteDictionary,
-  type Locale,
-  type SiteTranslationDict,
-} from "@repo/i18n"
+import { getSiteDictionary, type Locale, type SiteTranslationDict } from "@repo/i18n"
 import React from "react"
 
 export type SiteLocale = Locale

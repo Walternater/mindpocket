@@ -1,5 +1,5 @@
-import { CliError } from "./errors.js"
 import { ensureOk, parseJsonResponse } from "./http.js"
+import { toServerUnreachableError } from "./network-runtime.js"
 
 export class ApiClient {
   private readonly baseUrl: string
@@ -29,7 +29,7 @@ export class ApiClient {
         headers,
       })
     } catch (error) {
-      throw new CliError("SERVER_UNREACHABLE", "Failed to reach MindPocket server", error)
+      throw toServerUnreachableError(error)
     }
 
     await ensureOk(response)

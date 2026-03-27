@@ -2,10 +2,15 @@ import { detectPlatform, hasPlatformIcon, PLATFORM_CONFIG } from "@repo/icons/we
 import { useEffect, useState } from "react"
 import {
   getCachedUser,
+  getInjectionPlatformSettings,
   getServerUrl,
   getSession,
+  type InjectionPlatformSettings,
   removeCachedUser,
+  SUPPORTED_INJECTION_PLATFORMS,
+  type SupportedInjectionPlatform,
   setCachedUser,
+  setInjectionPlatformSettings,
   setServerUrl,
   signIn,
   signOut,
@@ -20,11 +25,17 @@ interface User {
 type Status = "idle" | "loading" | "success" | "error"
 const WWW_PREFIX_REGEX = /^www\./
 const TRAILING_SLASH_REGEX = /\/+$/
+const INJECTION_PLATFORM_OPTIONS: SupportedInjectionPlatform[] = [...SUPPORTED_INJECTION_PLATFORMS]
 
 function App() {
   const [user, setUser] = useState<User | null>(null)
   const [checking, setChecking] = useState(true)
   const [page, setPage] = useState<"main" | "settings">("main")
+
+  const handleLogout = () => {
+    setUser(null)
+    setPage("main")
+  }
 
   useEffect(() => {
     getCachedUser().then((cached) => {
@@ -61,17 +72,15 @@ function App() {
     )
   }
 
-  if (page === "settings") {
-    return <SettingsPage onBack={() => setPage("main")} />
-  }
-
   if (!user) {
     return <LoginForm onLogin={setUser} />
   }
 
-  return (
-    <SavePage onLogout={() => setUser(null)} onSettings={() => setPage("settings")} user={user} />
-  )
+  if (page === "settings") {
+    return <SettingsPage onBack={() => setPage("main")} onLogout={handleLogout} user={user} />
+  }
+
+  return <SavePage onSettings={() => setPage("settings")} />
 }
 
 function LoginForm({ onLogin }: { onLogin: (user: User) => void }) {
@@ -147,15 +156,7 @@ function LoginForm({ onLogin }: { onLogin: (user: User) => void }) {
   )
 }
 
-function SavePage({
-  user,
-  onLogout,
-  onSettings,
-}: {
-  user: User
-  onLogout: () => void
-  onSettings: () => void
-}) {
+function SavePage({ onSettings }: { onSettings: () => void }) {
   const [status, setStatus] = useState<Status>("idle")
   const [message, setMessage] = useState("")
   const [pageInfo, setPageInfo] = useState<{
@@ -213,19 +214,8 @@ function SavePage({
               <circle cx="12" cy="12" r="3" />
             </svg>
           </button>
-          <button
-            className="logout-btn"
-            onClick={async () => {
-              await signOut()
-              onLogout()
-            }}
-            type="button"
-          >
-            退出
-          </button>
         </div>
       </div>
-      <p className="user-info">{user.email}</p>
       {pageInfo && (
         <div className="page-info">
           {hasPlatformIcon(pageInfo.platform) ? (
@@ -261,18 +251,41 @@ function SavePage({
   )
 }
 
-function SettingsPage({ onBack }: { onBack: () => void }) {
+function SettingsPage({
+  onBack,
+  onLogout,
+  user,
+}: {
+  onBack: () => void
+  onLogout: () => void
+  user: User
+}) {
   const [serverUrl, setServerUrlState] = useState("")
+  const [platformSettings, setPlatformSettings] = useState<InjectionPlatformSettings | null>(null)
   const [status, setStatus] = useState<Status>("idle")
 
   useEffect(() => {
-    getServerUrl().then(setServerUrlState)
+    Promise.all([getServerUrl(), getInjectionPlatformSettings()]).then(
+      ([savedServerUrl, savedSettings]) => {
+        setServerUrlState(savedServerUrl)
+        setPlatformSettings(savedSettings)
+      }
+    )
   }, [])
+
+  const handlePlatformToggle = (platform: SupportedInjectionPlatform, checked: boolean) => {
+    setPlatformSettings((current) => (current ? { ...current, [platform]: checked } : current))
+  }
 
   const handleSave = async () => {
     const trimmed = serverUrl.replace(TRAILING_SLASH_REGEX, "")
+    if (!platformSettings) {
+      return
+    }
+
     setStatus("loading")
     await setServerUrl(trimmed)
+    await setInjectionPlatformSettings(platformSettings)
     setServerUrlState(trimmed)
     setStatus("success")
     setTimeout(() => setStatus("idle"), 1500)
@@ -286,24 +299,65 @@ function SettingsPage({ onBack }: { onBack: () => void }) {
           ← 返回
         </button>
       </div>
-      <label className="settings-label" htmlFor="server-url">
-        服务器地址
-      </label>
-      <input
-        className="input"
-        id="server-url"
-        onChange={(e) => setServerUrlState(e.target.value)}
-        placeholder="http://127.0.0.1:3000"
-        value={serverUrl}
-      />
+      <div className="settings-section">
+        <p className="settings-label">账号</p>
+        <p className="settings-account">{user.email}</p>
+      </div>
+      <div className="settings-section">
+        <label className="settings-label" htmlFor="server-url">
+          服务器地址
+        </label>
+        <input
+          className="input"
+          id="server-url"
+          onChange={(e) => setServerUrlState(e.target.value)}
+          placeholder="http://127.0.0.1:3000"
+          value={serverUrl}
+        />
+      </div>
+      <div className="settings-section">
+        <p className="settings-label">平台按钮开关</p>
+        <div className="settings-switches">
+          {platformSettings &&
+            INJECTION_PLATFORM_OPTIONS.map((platform) => {
+              const config = PLATFORM_CONFIG[platform]
+              return (
+                <label className="switch-row" htmlFor={`platform-${platform}`} key={platform}>
+                  <span>{config.label}</span>
+                  <span className="switch">
+                    <input
+                      checked={platformSettings[platform]}
+                      id={`platform-${platform}`}
+                      onChange={(e) => handlePlatformToggle(platform, e.target.checked)}
+                      type="checkbox"
+                    />
+                    <span className="switch-slider" />
+                  </span>
+                </label>
+              )
+            })}
+        </div>
+      </div>
       <button
         className="btn btn-primary"
-        disabled={status === "loading"}
+        disabled={status === "loading" || !platformSettings}
         onClick={handleSave}
         type="button"
       >
         {status === "success" ? "已保存" : "保存"}
       </button>
+      <div className="settings-actions">
+        <button
+          className="logout-btn"
+          onClick={async () => {
+            await signOut()
+            onLogout()
+          }}
+          type="button"
+        >
+          退出登录
+        </button>
+      </div>
     </div>
   )
 }

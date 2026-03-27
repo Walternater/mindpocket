@@ -18,7 +18,7 @@ export default function ContentSection() {
                 alt="MindPocket web preview"
                 className="rounded-[15px] shadow"
                 height={929}
-                src="/docs/pic/web.png"
+                src="/marketing/pic/web.png"
                 width={1207}
               />
             </div>

@@ -1,6 +1,7 @@
 import { ApiClient } from "../lib/api-client.js"
 import { storeSession } from "../lib/auth-store.js"
 import { CliError } from "../lib/errors.js"
+import { toServerUnreachableError } from "../lib/network-runtime.js"
 import { openBrowser } from "../lib/open-browser.js"
 import { ok, printStderr } from "../lib/result.js"
 import { resolveServerUrl } from "../lib/server-url.js"
@@ -69,18 +70,24 @@ async function pollDeviceToken(
   deviceCode: string,
   intervalMs: number
 ): Promise<DevicePollOutcome> {
-  const response = await fetch(`${serverUrl}/api/auth/device/token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({
-      grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-      device_code: deviceCode,
-      client_id: CLIENT_ID,
-    }),
-  })
+  let response: Response
+
+  try {
+    response = await fetch(`${serverUrl}/api/auth/device/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+        device_code: deviceCode,
+        client_id: CLIENT_ID,
+      }),
+    })
+  } catch (error) {
+    throw toServerUnreachableError(error)
+  }
 
   if (response.ok) {
     return {

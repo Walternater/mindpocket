@@ -40,3 +40,4 @@ docs/PROJECT.md
 apps/web/tsconfig.tsbuildinfo
 .superset/
 .playwright-mcp
+apps/site/.source/

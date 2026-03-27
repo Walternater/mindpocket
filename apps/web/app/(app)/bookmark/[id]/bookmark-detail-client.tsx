@@ -163,9 +163,7 @@ function Header({
   )
 }
 
-function getSourceLabel(
-  sourceType: string | null
-): {
+function getSourceLabel(sourceType: string | null): {
   label: "sourceWeb" | "sourceExtension" | "sourceFile"
   icon: typeof Monitor | typeof Puzzle | typeof FileText
 } {
@@ -301,11 +299,14 @@ function MetadataSection({ bookmark }: { bookmark: BookmarkDetail }) {
               {t.bookmarkDetail.publishedAt}
             </span>
             <span>
-              {new Date(bookmark.sourceCreatedAt).toLocaleDateString(locale === "zh" ? "zh-CN" : "en", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {new Date(bookmark.sourceCreatedAt).toLocaleDateString(
+                locale === "zh" ? "zh-CN" : "en",
+                {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }
+              )}
             </span>
           </>
         )}

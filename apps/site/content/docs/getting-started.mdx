@@ -1,0 +1,50 @@
+---
+title: 快速开始
+description: 在本地启动 MindPocket 公开站点与主应用所需的最小步骤。
+---
+
+# 快速开始
+
+## 环境要求
+
+- Node.js 18+
+- `pnpm@10.9.0`
+- PostgreSQL 数据库
+
+## 安装依赖
+
+```bash
+pnpm install
+```
+
+## 启动应用
+
+### 官网与文档站
+
+```bash
+pnpm --filter site dev
+```
+
+### Web 主应用
+
+```bash
+pnpm --filter web dev
+```
+
+## 必要环境变量
+
+Web 应用依赖数据库连接，请在 `apps/web/.env.local` 中至少配置：
+
+```bash
+DATABASE_URL=postgres://...
+```
+
+如果你要使用 AI 能力，还需要补齐对应模型提供商的密钥。
+
+## Monorepo 说明
+
+- `apps/site`: 官网与公开文档
+- `apps/web`: 主产品 Web 应用
+- `apps/native`: Expo 移动端
+- `apps/extension`: 浏览器扩展
+- `packages/*`: 共享包

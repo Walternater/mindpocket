@@ -614,7 +614,8 @@ const en: WebTranslationDict = {
   ingestDialog: {
     trigger: "Import",
     title: "Import content",
-    description: "Paste a link or upload a file to convert it into Markdown and save it to your knowledge base",
+    description:
+      "Paste a link or upload a file to convert it into Markdown and save it to your knowledge base",
     tabUrl: "Link",
     tabFile: "File",
     urlLabel: "Web link",
@@ -671,7 +672,8 @@ const en: WebTranslationDict = {
     deleteFailed: "Failed to delete",
     deleteNetworkFailed: "Delete failed, please check your network connection",
     title: "Bilibili subtitle extraction",
-    description: "After configuring Bilibili login credentials, the system can automatically extract subtitles from Bilibili videos",
+    description:
+      "After configuring Bilibili login credentials, the system can automatically extract subtitles from Bilibili videos",
     configured: "Bilibili credentials configured",
     update: "Update",
     delete: "Delete",
@@ -689,7 +691,8 @@ const en: WebTranslationDict = {
     save: "Save",
     cancel: "Cancel",
     noteLabel: "Note:",
-    noteContent: "Credentials are stored encrypted. Cookies expire over time, so update them if subtitle extraction fails.",
+    noteContent:
+      "Credentials are stored encrypted. Cookies expire over time, so update them if subtitle extraction fails.",
   },
   feedback: {
     logoutFailed: "Sign out failed, please try again later",

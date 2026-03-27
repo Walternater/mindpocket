@@ -27,14 +27,17 @@ const typeColors: Record<string, string> = {
 export function TypeDistribution({ data }: TypeDistributionProps) {
   const t = useT()
   const total = useMemo(() => data.reduce((sum, item) => sum + item.count, 0), [data])
-  const typeLabels: Record<string, string> = {
-    link: t.bookmarkList.typeLink,
-    text: t.dashboard.typeText,
-    image: t.bookmarkList.typeImage,
-    video: t.bookmarkList.typeVideo,
-    audio: t.dashboard.typeAudio,
-    pdf: t.dashboard.typePdf,
-  }
+  const typeLabels: Record<string, string> = useMemo(
+    () => ({
+      link: t.bookmarkList.typeLink,
+      text: t.dashboard.typeText,
+      image: t.bookmarkList.typeImage,
+      video: t.bookmarkList.typeVideo,
+      audio: t.dashboard.typeAudio,
+      pdf: t.dashboard.typePdf,
+    }),
+    [t]
+  )
 
   const chartConfig = useMemo(() => {
     const config: ChartConfig = {}

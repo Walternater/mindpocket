@@ -86,6 +86,16 @@
           }
         }
       }
+    },
+    {
+      "includes": ["apps/web/tests/e2e/login.spec.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noSkippedTests": "off"
+          }
+        }
+      }
     }
   ],
   "javascript": {

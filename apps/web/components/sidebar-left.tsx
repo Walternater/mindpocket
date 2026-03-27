@@ -263,7 +263,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
         toast.error(t.feedback.moveFailed)
       }
     },
-    [moveBookmarkInStore]
+    [moveBookmarkInStore, t.feedback.moveFailed, t.sidebar.bookmarkMoved]
   )
 
   const reorderFolders = useCallback(
@@ -274,7 +274,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
         toast.error(t.feedback.sortFailed)
       }
     },
-    [folders, reorderFoldersInStore]
+    [folders, reorderFoldersInStore, t.feedback.sortFailed]
   )
 
   const handleDragEnd = useCallback(

@@ -2,6 +2,18 @@ const DEFAULT_SERVER = import.meta.env.WXT_API_BASE || "http://127.0.0.1:3000"
 const SERVER_KEY = "mindpocket_server"
 const TOKEN_KEY = "mindpocket_token"
 const USER_KEY = "mindpocket_user"
+const INJECTION_PLATFORMS_KEY = "mindpocket_injection_platforms"
+
+export const SUPPORTED_INJECTION_PLATFORMS = ["twitter", "zhihu", "xiaohongshu"] as const
+
+export type SupportedInjectionPlatform = (typeof SUPPORTED_INJECTION_PLATFORMS)[number]
+export type InjectionPlatformSettings = Record<SupportedInjectionPlatform, boolean>
+
+const DEFAULT_INJECTION_PLATFORM_SETTINGS: InjectionPlatformSettings = {
+  twitter: true,
+  zhihu: true,
+  xiaohongshu: true,
+}
 
 export async function getServerUrl(): Promise<string> {
   const result = await chrome.storage.local.get<Record<string, string>>(SERVER_KEY)
@@ -10,6 +22,24 @@ export async function getServerUrl(): Promise<string> {
 
 export async function setServerUrl(url: string): Promise<void> {
   await chrome.storage.local.set({ [SERVER_KEY]: url })
+}
+
+export async function getInjectionPlatformSettings(): Promise<InjectionPlatformSettings> {
+  const result =
+    await chrome.storage.local.get<Record<string, Partial<InjectionPlatformSettings>>>(
+      INJECTION_PLATFORMS_KEY
+    )
+
+  return {
+    ...DEFAULT_INJECTION_PLATFORM_SETTINGS,
+    ...result[INJECTION_PLATFORMS_KEY],
+  }
+}
+
+export async function setInjectionPlatformSettings(
+  settings: InjectionPlatformSettings
+): Promise<void> {
+  await chrome.storage.local.set({ [INJECTION_PLATFORMS_KEY]: settings })
 }
 
 export async function getToken(): Promise<string | null> {

@@ -106,8 +106,7 @@ function getAuthorHtml(noteRoot: HTMLElement): string {
   return (
     cloneAndClean(noteRoot.querySelector(".interaction-container .author-container"), [
       ".note-detail-follow-btn",
-    ]) ||
-    cloneAndClean(noteRoot.querySelector(":scope > .author"), [".note-detail-follow-btn"])
+    ]) || cloneAndClean(noteRoot.querySelector(":scope > .author"), [".note-detail-follow-btn"])
   )
 }
 

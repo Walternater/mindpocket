@@ -196,7 +196,7 @@ export default function HeroSection() {
                       alt="web app screen"
                       className="z-2 border-border/25 bg-background aspect-15/8 relative rounded-2xl border"
                       height="1440"
-                      src="/docs/pic/web.png"
+                      src="/marketing/pic/web.png"
                       width="2700"
                     />
                   </div>

@@ -1,10 +1,6 @@
 "use client"
 
-import {
-  getWebDictionary,
-  type Locale,
-  type WebTranslationDict,
-} from "@repo/i18n"
+import { getWebDictionary, type Locale, type WebTranslationDict } from "@repo/i18n"
 import { createContext, useCallback, useContext, useEffect, useState } from "react"
 
 export type { Locale } from "@repo/i18n"
