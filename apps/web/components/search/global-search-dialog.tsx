@@ -189,7 +189,7 @@ export function GlobalSearchDialog() {
                   key={item.id}
                   onSelect={() => {
                     closeSearchDialog()
-                    router.push(`/bookmark/${item.id}`)
+                    router.push(`/bookmark?id=${item.id}`)
                   }}
                   value={`${item.id}-${item.title}`}
                 >

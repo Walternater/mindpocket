@@ -10,7 +10,8 @@ export default defineConfig({
   manifest: {
     name: "MindPocket",
     description: "Save web pages to MindPocket",
-    permissions: ["activeTab", "storage", "notifications"],
+    // alarms/tabs：后台定时抓取 pending_browser 队列
+    permissions: ["activeTab", "storage", "notifications", "alarms", "tabs"],
     host_permissions: ["<all_urls>"],
   },
 })

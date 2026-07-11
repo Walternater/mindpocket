@@ -1,5 +1,8 @@
 import { ImageResponse } from "next/og"
 
+// 静态导出要求元数据图片路由为静态生成
+export const dynamic = "force-static"
+
 export const size = { width: 180, height: 180 }
 export const contentType = "image/png"
 

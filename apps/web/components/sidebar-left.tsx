@@ -33,7 +33,7 @@ import {
   Trash2,
 } from "lucide-react"
 import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import type * as React from "react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -94,6 +94,9 @@ const socialLinks = [
 
 export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  // 详情页改为查询参数路由（/chat?id=、/folders?id=、/bookmark?id=），高亮判断用 id 参数
+  const activeId = searchParams.get("id")
   const router = useRouter()
   const t = useT()
 
@@ -173,7 +176,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
         })
         if (res.ok) {
           deleteChatFromStore(chatId)
-          if (pathname === `/chat/${chatId}`) {
+          if (pathname === "/chat" && activeId === chatId) {
             router.push("/chat")
           }
           toast.success(t.sidebar.chatDeleted)
@@ -182,14 +185,14 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
         toast.error(t.sidebar.chatDeleteFailed)
       }
     },
-    [pathname, router, t, deleteChatFromStore]
+    [pathname, activeId, router, t, deleteChatFromStore]
   )
 
   const handleDeleteFolder = useCallback(
     async (folderId: string) => {
       const success = await deleteFolderFromStore(folderId)
       if (success) {
-        if (pathname === `/folders/${folderId}`) {
+        if (pathname === "/folders" && activeId === folderId) {
           router.push("/")
         }
         toast.success(t.sidebar.folderDeleted)
@@ -197,7 +200,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
         toast.error(t.sidebar.folderDeleteFailed)
       }
     },
-    [pathname, router, t, deleteFolderFromStore]
+    [pathname, activeId, router, t, deleteFolderFromStore]
   )
 
   const handleDeleteBookmark = useCallback(
@@ -215,7 +218,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
               removeBookmarkFromFolder(folder.id, bookmarkId)
             }
           }
-          if (pathname === `/bookmark/${bookmarkId}`) {
+          if (pathname === "/bookmark" && activeId === bookmarkId) {
             router.push("/")
           }
           toast.success(t.sidebar.bookmarkDeleted)
@@ -226,7 +229,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
         toast.error(t.sidebar.bookmarkDeleteFailed)
       }
     },
-    [pathname, router, t, folders, removeBookmarkFromFolder]
+    [pathname, activeId, router, t, folders, removeBookmarkFromFolder]
   )
 
   const handleEmojiChange = useCallback(
@@ -420,7 +423,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
                 (showAllChats ? chats : chats.slice(0, 4)).map((chat) => (
                   <ChatMenuItem
                     chat={chat}
-                    isActive={pathname === `/chat/${chat.id}`}
+                    isActive={pathname === "/chat" && activeId === chat.id}
                     key={chat.id}
                     onDelete={(e) => handleDeleteChat(e, chat.id)}
                     t={t}
@@ -480,7 +483,7 @@ export function SidebarLeft({ ...props }: React.ComponentProps<typeof Sidebar>) 
                     folders.map((f) => (
                       <FolderMenuItem
                         folder={f}
-                        isActive={pathname === `/folders/${f.id}`}
+                        isActive={pathname === "/folders" && activeId === f.id}
                         key={f.id}
                         onDelete={() => handleDeleteFolder(f.id)}
                         onDeleteBookmark={handleDeleteBookmark}
@@ -593,7 +596,7 @@ function ChatMenuItem({
       }}
     >
       <SidebarMenuButton asChild isActive={isActive}>
-        <Link href={`/chat/${chat.id}`}>
+        <Link href={`/chat?id=${chat.id}`}>
           <span className="truncate">{chat.title}</span>
         </Link>
       </SidebarMenuButton>
@@ -668,7 +671,7 @@ function FolderMenuItem({
                 setOpen(true)
               }}
             >
-              <Link href={`/folders/${folder.id}`}>
+              <Link href={`/folders?id=${folder.id}`}>
                 <PopoverAnchor asChild>
                   <span
                     className="cursor-grab active:cursor-grabbing"
@@ -767,7 +770,7 @@ function BookmarkMenuItem({
       style={{ opacity: isDragging ? 0.5 : undefined }}
     >
       <SidebarMenuSubButton asChild>
-        <Link href={`/bookmark/${bookmark.id}`}>
+        <Link href={`/bookmark?id=${bookmark.id}`}>
           <span className="cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
             <GripVertical className="size-3 text-muted-foreground" />
           </span>

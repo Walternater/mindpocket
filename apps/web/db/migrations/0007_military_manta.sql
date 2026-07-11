@@ -1,1 +1,0 @@
-ALTER TABLE "bookmark" ADD COLUMN "client_source" text NOT NULL;

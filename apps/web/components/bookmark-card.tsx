@@ -114,7 +114,7 @@ export function BookmarkCard({ item }: { item: BookmarkItem }) {
           "group relative flex flex-col overflow-hidden rounded-xl border bg-card",
           "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
         )}
-        href={`/bookmark/${item.id}`}
+        href={`/bookmark?id=${item.id}`}
       >
         {/* 封面图 */}
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">

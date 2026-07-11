@@ -124,7 +124,7 @@ export function Chat({
       setInput("")
 
       if (!hasReplacedUrl.current && initialMessages.length === 0) {
-        window.history.replaceState({}, "", `/chat/${id}`)
+        window.history.replaceState({}, "", `/chat?id=${id}`)
         hasReplacedUrl.current = true
       }
     },

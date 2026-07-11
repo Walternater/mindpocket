@@ -1,1 +1,0 @@
-ALTER TABLE "bookmark" ALTER COLUMN "client_source" SET DEFAULT 'web';

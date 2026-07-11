@@ -1,5 +1,8 @@
 import { ImageResponse } from "next/og"
 
+// 静态导出要求元数据图片路由为静态生成
+export const dynamic = "force-static"
+
 export const alt = "MindPocket"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"

@@ -1,9 +1,0 @@
-node_modules
-.git
-.next
-.turbo
-.env*
-docs
-.husky
-.vscode
-*.md

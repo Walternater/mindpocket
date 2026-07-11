@@ -1,3 +1,4 @@
+import { htmlToMarkdown } from "../markdown"
 import {
   buildFallbackPayload,
   createMindPocketButton,
@@ -151,10 +152,13 @@ function buildZhihuPayload(answerRoot: HTMLElement): SavePayload {
   const questionTitle = findZhihuQuestionTitle(answerRoot)
   const authorName = findZhihuAuthorName(answerRoot)
 
+  // 端侧转换：回答 HTML → Markdown，失败则回退原始 HTML
+  const html = extractZhihuAnswerHtml(answerRoot)
+  const markdown = htmlToMarkdown(html)
   return {
     url: findZhihuAnswerPermalink(answerRoot) ?? window.location.href,
     title: [questionTitle, authorName].filter(Boolean).join(" - ") || document.title,
-    html: extractZhihuAnswerHtml(answerRoot),
+    ...(markdown ? { markdown } : { html }),
   }
 }
 

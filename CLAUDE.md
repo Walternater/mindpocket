@@ -6,15 +6,21 @@
 
 ### Tech Stack
 
-**Web 应用:**
-- **框架**: Next.js 16 (App Router)
+**Web 前端 (apps/web):**
+- **框架**: Next.js 16 (App Router)，`output: "export"` 纯静态导出（无服务端运行时）
 - **UI**: Radix UI + Tailwind CSS 4
-- **认证**: Better Auth (基于 email/password)
-- **数据库**: PostgreSQL + Drizzle ORM (Neon Serverless)
-- **AI**: Vercel AI SDK + OpenAI
 - **状态管理**: Zustand
 - **动画**: Motion (Framer Motion)
 - **其他**: React Native Web (跨平台组件共享)
+
+**API 后端 (apps/api，Cloudflare Workers):**
+- **框架**: Hono
+- **认证**: Better Auth (email/password + 2FA + device authorization)
+- **数据库**: Cloudflare D1 (SQLite) + Drizzle ORM
+- **向量检索**: Cloudflare Vectorize（1024 维 cosine）
+- **文件存储**: Cloudflare R2
+- **AI**: Vercel AI SDK（openai-compatible，用户在设置里自配 provider）
+- **部署**: 单个 Worker 同时服务静态资产（apps/web/out）与 /api/*，见 `docs/CLOUDFLARE.md`
 
 **Native 应用:**
 - **框架**: Expo + React Native
@@ -25,21 +31,21 @@
 ### 认证架构
 
 使用 Better Auth 实现认证系统：
-- **服务端**: `apps/web/lib/auth.ts` - Better Auth 配置
+- **服务端**: `apps/api/src/lib/auth.ts` - 每请求工厂 `createAuth(env, db)`（Workers 下 D1 binding 只在请求上下文可用）
 - **客户端**: `apps/web/lib/auth-client.ts` - 客户端 SDK
-- **API 路由**: `apps/web/app/api/auth/[...all]/route.ts` - 认证端点
-- **数据库 Schema**: `apps/web/db/schema/auth.ts` - 用户和账户表
+- **API 挂载**: `apps/api/src/index.ts` - `/api/auth/*`
+- **数据库 Schema**: `apps/api/db/schema/auth.ts`
 
 ### 数据库架构
 
-- **ORM**: Drizzle ORM
-- **数据库**: PostgreSQL (Neon Serverless)
-- **配置文件**: `apps/web/drizzle.config.ts`
-- **Schema 位置**: `apps/web/db/schema/`
-- **迁移文件**: `apps/web/db/migrations/`
-- **客户端**: `apps/web/db/client.ts`
+- **ORM**: Drizzle ORM（sqlite 方言）
+- **数据库**: Cloudflare D1
+- **配置文件**: `apps/api/drizzle.config.ts`
+- **Schema 位置**: `apps/api/db/schema/`
+- **迁移文件**: `apps/api/db/migrations/`
+- **客户端**: `apps/api/db/client.ts`（`createDb(env.DB)`）；业务代码通过 `apps/api/src/context.ts` 的 AsyncLocalStorage 代理使用模块级 `db`
 
-环境变量需要在 `apps/web/.env.local` 中配置 `DATABASE_URL`。
+本地密钥放 `apps/api/.dev.vars`（`BETTER_AUTH_SECRET`）。
 
 ### UI 组件
 
@@ -62,21 +68,20 @@
 
 ### 数据库工作流
 
-1. 修改 schema 文件 (`apps/web/db/schema/`)
-2. 运行 `pnpm db:generate` 生成迁移
-3. 运行 `pnpm db:migrate` 应用迁移（生产环境）
-4. 或运行 `pnpm db:push` 直接推送（开发环境）
+1. 修改 schema 文件 (`apps/api/db/schema/`)
+2. 在 `apps/api` 运行 `pnpm db:generate` 生成迁移
+3. 运行 `pnpm db:migrate:local` 应用到本地 D1（开发）
+4. 运行 `pnpm db:migrate:remote` 应用到远程 D1（生产）
 
 ### 创建新用户
 
-由于认证系统需要密码哈希，不能直接在数据库中创建用户。使用提供的脚本：
+注册在首个用户创建后自动关闭。新环境直接通过 `/signup` 页面或
+`POST /api/auth/sign-up/email` 注册第一个用户即可。
 
-```bash
-cd apps/web
-pnpm tsx scripts/create-user.ts your@email.com yourpassword "Your Name"
-```
+### 部署
 
-最新版 nextjs 的 middleware 改名 proxy.ts ，请注意区分
+`pnpm deploy:cf` 一键构建并部署到 Cloudflare Workers，完整流程见 `docs/CLOUDFLARE.md`。
+前端是纯静态导出（无 middleware/proxy），登录保护由客户端守卫 + API 层鉴权（`apps/api/src/middleware.ts`）完成。
 
 
 ### Turbo 缓存

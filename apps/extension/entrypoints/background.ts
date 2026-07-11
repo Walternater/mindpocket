@@ -1,6 +1,9 @@
 interface SavePayload {
   url: string
-  html: string
+  // 端侧解析好的 Markdown（新协议，优先）
+  markdown?: string
+  // 原始 HTML（解析失败时的降级方案）
+  html?: string
   title?: string
 }
 
@@ -10,11 +13,23 @@ function isSavePayload(value: unknown): value is SavePayload {
   }
 
   const candidate = value as Record<string, unknown>
+  const hasContent = typeof candidate.markdown === "string" || typeof candidate.html === "string"
   return (
     typeof candidate.url === "string" &&
-    typeof candidate.html === "string" &&
+    hasContent &&
     (typeof candidate.title === "string" || typeof candidate.title === "undefined")
   )
+}
+
+// 浏览器抓取队列的定时器：浏览器启动 1 分钟后首跑，之后每 10 分钟一轮
+const CRAWL_ALARM = "mindpocket-browser-crawl"
+const CRAWL_PERIOD_MINUTES = 10
+
+function scheduleCrawlAlarm() {
+  browser.alarms.create(CRAWL_ALARM, {
+    delayInMinutes: 1,
+    periodInMinutes: CRAWL_PERIOD_MINUTES,
+  })
 }
 
 export default defineBackground(() => {
@@ -22,6 +37,17 @@ export default defineBackground(() => {
     if (message.type === "SAVE_PAGE") {
       handleSavePage(message.payload).then(sendResponse)
       return true
+    }
+  })
+
+  // 安装/浏览器启动时注册定时抓取
+  browser.runtime.onInstalled.addListener(scheduleCrawlAlarm)
+  browser.runtime.onStartup.addListener(scheduleCrawlAlarm)
+
+  browser.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === CRAWL_ALARM) {
+      const { runBrowserCrawl } = await import("../lib/browser-crawler")
+      await runBrowserCrawl()
     }
   })
 })
@@ -57,6 +83,7 @@ async function handleSavePage(payload?: unknown) {
     const { saveBookmark } = await import("../lib/auth-client")
     const result = await saveBookmark({
       url: response.url,
+      markdown: response.markdown,
       html: response.html,
       title: response.title,
     })
