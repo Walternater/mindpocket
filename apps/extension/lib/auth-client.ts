@@ -3,6 +3,7 @@ const SERVER_KEY = "mindpocket_server"
 const TOKEN_KEY = "mindpocket_token"
 const USER_KEY = "mindpocket_user"
 const INJECTION_PLATFORMS_KEY = "mindpocket_injection_platforms"
+const EXT_CLIENT_ID = "mindpocket-extension"
 
 export const SUPPORTED_INJECTION_PLATFORMS = ["twitter", "zhihu", "xiaohongshu"] as const
 
@@ -91,18 +92,82 @@ async function authFetch(path: string, options: RequestInit = {}) {
   return { ok: res.ok, status: res.status, data }
 }
 
-export async function signIn(email: string, password: string) {
-  const res = await authFetch("/api/auth/sign-in/email", {
+// 设备授权流程：请求设备码
+export interface DeviceCodeResponse {
+  device_code: string
+  user_code: string
+  verification_uri: string
+  verification_uri_complete: string
+  expires_in: number
+  interval: number
+}
+
+export async function requestDeviceCode(): Promise<DeviceCodeResponse> {
+  const baseUrl = await getServerUrl()
+  const res = await fetch(`${baseUrl}/api/auth/device/code`, {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ client_id: EXT_CLIENT_ID }),
   })
-  if (res.ok && res.data?.token) {
-    await setToken(res.data.token)
+  const text = await res.text()
+  const data = text ? JSON.parse(text) : null
+  if (!res.ok) {
+    throw new Error(data?.error_description || `请求设备码失败 (${res.status})`)
   }
+  return data
+}
+
+// 设备授权流程：轮询授权状态
+export type DevicePollResult =
+  | { status: "pending" }
+  | { status: "slow_down"; intervalMs: number }
+  | { status: "authorized"; accessToken: string }
+
+export async function pollDeviceToken(
+  deviceCode: string,
+  currentIntervalMs: number
+): Promise<DevicePollResult> {
+  const baseUrl = await getServerUrl()
+  const res = await fetch(`${baseUrl}/api/auth/device/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grant_type: "urn:ietf:params:oauth:grant-type:device_code",
+      device_code: deviceCode,
+      client_id: EXT_CLIENT_ID,
+    }),
+  })
+
+  if (res.ok) {
+    const data = await res.json()
+    return { status: "authorized", accessToken: data.access_token }
+  }
+
+  const data = await res.json()
+  if (data.error === "authorization_pending") {
+    return { status: "pending" }
+  }
+  if (data.error === "slow_down") {
+    return { status: "slow_down", intervalMs: currentIntervalMs + 5000 }
+  }
+  if (data.error === "expired_token") {
+    throw new Error("验证码已过期，请重新发起登录。")
+  }
+  if (data.error === "access_denied") {
+    throw new Error("授权被拒绝。")
+  }
+  throw new Error(data.error_description || "设备授权失败。")
+}
+
+// 设备授权流程：获取用户信息并持久化
+export async function completeDeviceAuth(accessToken: string) {
+  await setToken(accessToken)
+  const res = await getSession()
   if (res.ok && res.data?.user) {
     await setCachedUser(res.data.user)
+    return res.data.user
   }
-  return res
+  throw new Error("登录成功但获取用户信息失败。")
 }
 
 export function getSession() {

@@ -1,13 +1,17 @@
 "use client"
 
-import { Monitor, Moon, Sun } from "lucide-react"
+import type { ViewMode } from "@repo/types"
+import { Grid3X3, LayoutList, Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useT } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { useUIStore } from "@/stores"
 
 export function SettingsAppearance() {
   const t = useT()
   const { theme, setTheme } = useTheme()
+  const bookmarkViewMode = useUIStore((s) => s.bookmarkViewMode)
+  const setBookmarkViewMode = useUIStore((s) => s.setBookmarkViewMode)
 
   const themes = [
     {
@@ -32,9 +36,7 @@ export function SettingsAppearance() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="font-medium text-sm">{t.settings.theme}</h3>
-      </div>
+      <h3 className="font-medium text-sm">{t.settings.theme}</h3>
       <div className="grid grid-cols-3 gap-4">
         {themes.map((item) => (
           <button
@@ -78,6 +80,32 @@ export function SettingsAppearance() {
                   />
                 </div>
               </div>
+            </div>
+            <span className="text-sm">{item.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* 收藏视图模式选择 */}
+      <h3 className="font-medium text-sm">{t.settings.bookmarkView}</h3>
+      <div className="grid grid-cols-2 gap-4">
+        {[
+          { value: "grid" as ViewMode, label: t.settings.viewGrid, icon: Grid3X3 },
+          { value: "list" as ViewMode, label: t.settings.viewList, icon: LayoutList },
+        ].map((item) => (
+          <button
+            className={cn(
+              "flex flex-col items-center gap-2 rounded-lg border-2 p-3 transition-colors",
+              bookmarkViewMode === item.value
+                ? "border-primary"
+                : "border-transparent hover:border-muted-foreground/25"
+            )}
+            key={item.value}
+            onClick={() => setBookmarkViewMode(item.value)}
+            type="button"
+          >
+            <div className="flex h-16 w-full items-center justify-center rounded-md border bg-muted/30">
+              <item.icon className="size-8 text-muted-foreground" />
             </div>
             <span className="text-sm">{item.label}</span>
           </button>

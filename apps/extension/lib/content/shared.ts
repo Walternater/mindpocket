@@ -9,6 +9,8 @@ export interface SavePayload {
   title?: string
 }
 
+const EXTENSION_HOST_SELECTOR = ".mindpocket-host, mindpocket-picker-host, mindpocket-toast-host"
+
 interface MindPocketButtonOptions {
   payloadBuilder: () => SavePayload
   size: number
@@ -48,10 +50,38 @@ export function buildFallbackPayload(): SavePayload {
   }
 }
 
-export function removeInjectedHosts(root: ParentNode) {
-  for (const node of root.querySelectorAll(".mindpocket-host")) {
+function cleanupExtensionNodes(root: ParentNode) {
+  for (const node of root.querySelectorAll(EXTENSION_HOST_SELECTOR)) {
     node.remove()
   }
+}
+
+export function isMindPocketInjectedElement(element: Element | null): boolean {
+  if (!element) {
+    return false
+  }
+
+  return element.closest(EXTENSION_HOST_SELECTOR) !== null
+}
+
+export function buildElementPayload(element: Element): SavePayload {
+  const clone = element.cloneNode(true)
+
+  if (!(clone instanceof Element)) {
+    return buildFallbackPayload()
+  }
+
+  cleanupExtensionNodes(clone)
+
+  return {
+    url: window.location.href,
+    title: document.title,
+    html: clone.outerHTML,
+  }
+}
+
+export function removeInjectedHosts(root: ParentNode) {
+  cleanupExtensionNodes(root)
 }
 
 function createButtonIcon() {

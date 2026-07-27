@@ -1,18 +1,20 @@
 import { detectPlatform, hasPlatformIcon, PLATFORM_CONFIG } from "@repo/icons/web"
+import { Inbox, SquareMousePointer } from "lucide-react"
 import { useEffect, useState } from "react"
 import {
+  type DeviceCodeResponse,
   getCachedUser,
   getInjectionPlatformSettings,
   getServerUrl,
   getSession,
   type InjectionPlatformSettings,
   removeCachedUser,
+  requestDeviceCode,
   SUPPORTED_INJECTION_PLATFORMS,
   type SupportedInjectionPlatform,
   setCachedUser,
   setInjectionPlatformSettings,
   setServerUrl,
-  signIn,
   signOut,
 } from "../../lib/auth-client"
 import "./App.css"
@@ -23,6 +25,7 @@ interface User {
   email: string
 }
 type Status = "idle" | "loading" | "success" | "error"
+type LoginStep = "idle" | "requesting" | "polling" | "error"
 const WWW_PREFIX_REGEX = /^www\./
 const TRAILING_SLASH_REGEX = /\/+$/
 const INJECTION_PLATFORM_OPTIONS: SupportedInjectionPlatform[] = [...SUPPORTED_INJECTION_PLATFORMS]
@@ -54,8 +57,7 @@ function App() {
             removeCachedUser()
           }
         })
-        .catch((err) => {
-          console.error("[MindPocket] getSession error:", err)
+        .catch((_err) => {
           if (!cached) {
             setUser(null)
           }
@@ -73,7 +75,7 @@ function App() {
   }
 
   if (!user) {
-    return <LoginForm onLogin={setUser} />
+    return <DeviceLoginForm />
   }
 
   if (page === "settings") {
@@ -83,87 +85,114 @@ function App() {
   return <SavePage onSettings={() => setPage("settings")} />
 }
 
-function LoginForm({ onLogin }: { onLogin: (user: User) => void }) {
+function DeviceLoginForm() {
   const [server, setServer] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [status, setStatus] = useState<Status>("idle")
+  const [step, setStep] = useState<LoginStep>("idle")
+  const [deviceData, setDeviceData] = useState<DeviceCodeResponse | null>(null)
   const [error, setError] = useState("")
 
   useEffect(() => {
     getServerUrl().then(setServer)
   }, [])
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const startDeviceFlow = async (e: React.FormEvent) => {
     e.preventDefault()
-    setStatus("loading")
+    setStep("requesting")
     setError("")
 
     const trimmed = server.replace(TRAILING_SLASH_REGEX, "")
     await setServerUrl(trimmed)
 
     try {
-      const res = await signIn(email, password)
-      console.log("[MindPocket] signIn res:", JSON.stringify(res, null, 2))
-      if (res.ok && res.data?.user) {
-        setStatus("success")
-        onLogin(res.data.user)
-      } else {
-        setStatus("error")
-        setError(`登录失败 [${res.status}]: ${JSON.stringify(res.data)}`)
-      }
+      // 请求设备码
+      const codeResp = await requestDeviceCode()
+      setDeviceData(codeResp)
+
+      // 在新标签页打开验证页面
+      await browser.tabs.create({ url: codeResp.verification_uri_complete })
+
+      // 通知 background 开始轮询（popup 关闭后仍继续）
+      setStep("polling")
+      browser.runtime.sendMessage({
+        type: "START_DEVICE_POLL",
+        deviceCode: codeResp.device_code,
+        expiresIn: codeResp.expires_in,
+        interval: codeResp.interval,
+      })
     } catch (err) {
-      console.error("[MindPocket] signIn catch:", err)
-      setStatus("error")
-      setError(`请求异常: ${err}`)
+      setStep("error")
+      setError(String(err))
     }
   }
 
+  // 输入服务器地址并发起登录
+  if (step === "idle" || step === "requesting") {
+    return (
+      <div className="app">
+        <h1 style={{ fontSize: 16, fontWeight: 600 }}>MindPocket</h1>
+        <form className="form" onSubmit={startDeviceFlow}>
+          <input
+            className="input"
+            onChange={(e) => setServer(e.target.value)}
+            placeholder="服务器地址"
+            required
+            type="url"
+            value={server}
+          />
+          <button className="btn btn-primary" disabled={step === "requesting"} type="submit">
+            {step === "requesting" ? "请求中..." : "登录"}
+          </button>
+        </form>
+      </div>
+    )
+  }
+
+  // 显示验证码，提示用户在浏览器中完成授权
+  if (step === "polling" && deviceData) {
+    return (
+      <div className="app">
+        <h1 style={{ fontSize: 16, fontWeight: 600 }}>MindPocket</h1>
+        <div className="device-code-card">
+          <p className="device-code-label">用户验证码</p>
+          <p className="device-code-value">{deviceData.user_code}</p>
+        </div>
+        <p className="status">
+          已在浏览器中打开验证页面。
+          <br />
+          授权完成后重新打开此弹窗即可。
+        </p>
+      </div>
+    )
+  }
+
+  // 错误状态
   return (
     <div className="app">
       <h1 style={{ fontSize: 16, fontWeight: 600 }}>MindPocket</h1>
-      <form className="form" onSubmit={handleSubmit}>
-        <input
-          className="input"
-          onChange={(e) => setServer(e.target.value)}
-          placeholder="服务器地址"
-          required
-          type="url"
-          value={server}
-        />
-        <input
-          className="input"
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="邮箱"
-          required
-          type="email"
-          value={email}
-        />
-        <input
-          className="input"
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="密码"
-          required
-          type="password"
-          value={password}
-        />
-        <button className="btn btn-primary" disabled={status === "loading"} type="submit">
-          {status === "loading" ? "登录中..." : "登录"}
-        </button>
-        {error && <p className="error">{error}</p>}
-      </form>
+      {error && <p className="error">{error}</p>}
+      <button
+        className="btn btn-primary"
+        onClick={() => {
+          setStep("idle")
+          setDeviceData(null)
+          setError("")
+        }}
+        type="button"
+      >
+        重试
+      </button>
     </div>
   )
 }
 
 function SavePage({ onSettings }: { onSettings: () => void }) {
-  const [status, setStatus] = useState<Status>("idle")
-  const [message, setMessage] = useState("")
   const [pageInfo, setPageInfo] = useState<{
     url: string
     title: string
     platform: string | null
+    tabId: number | null
   } | null>(null)
+  const [actionError, setActionError] = useState("")
 
   useEffect(() => {
     browser.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
@@ -172,22 +201,31 @@ function SavePage({ onSettings }: { onSettings: () => void }) {
           url: tab.url,
           title: tab.title,
           platform: detectPlatform(tab.url),
+          tabId: tab.id ?? null,
         })
       }
     })
   }, [])
 
-  const handleSave = async () => {
-    setStatus("loading")
-    setMessage("")
+  // 发送消息后不等待结果，后台脚本会通过浏览器通知告知结果
+  const handleSave = () => {
+    browser.runtime.sendMessage({ type: "SAVE_PAGE" })
+    window.close()
+  }
 
-    const res = await browser.runtime.sendMessage({ type: "SAVE_PAGE" })
-    if (res?.success) {
-      setStatus("success")
-      setMessage(`已保存: ${res.data?.title || "页面"}`)
-    } else {
-      setStatus("error")
-      setMessage(res?.error || "保存失败")
+  const handlePickElement = async () => {
+    setActionError("")
+
+    try {
+      const tabId = pageInfo?.tabId
+      if (!tabId) {
+        throw new Error("当前标签页不可用。")
+      }
+
+      await browser.tabs.sendMessage(tabId, { type: "ENTER_ELEMENT_PICK_MODE" })
+      window.close()
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : "当前页面无法进入元素选择模式。")
     }
   }
 
@@ -237,16 +275,15 @@ function SavePage({ onSettings }: { onSettings: () => void }) {
           <p className="page-title">{pageInfo.title}</p>
         </div>
       )}
-      <button
-        className="btn btn-save"
-        disabled={status === "loading"}
-        onClick={handleSave}
-        type="button"
-      >
-        {status === "loading" ? "保存中..." : "收藏此页面"}
+      <button className="btn btn-save" onClick={handleSave} type="button">
+        <Inbox aria-hidden="true" size={16} />
+        收藏此页面
       </button>
-      {status === "success" && <p className="success">{message}</p>}
-      {status === "error" && <p className="error">{message}</p>}
+      <button className="btn btn-pick" onClick={handlePickElement} type="button">
+        <SquareMousePointer aria-hidden="true" size={16} />
+        选择元素保存
+      </button>
+      {actionError ? <p className="error">{actionError}</p> : null}
     </div>
   )
 }

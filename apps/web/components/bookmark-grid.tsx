@@ -217,7 +217,7 @@ function BookmarkList({ bookmarks, viewMode }: { bookmarks: BookmarkItem[]; view
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {bookmarks.map((item) => (
         <BookmarkCard item={item} key={item.id} />
       ))}
@@ -325,12 +325,12 @@ function LoadingSkeleton({ viewMode }: { viewMode: ViewMode }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {GRID_SKELETON_KEYS.map((key) => (
         <div className="flex flex-col gap-2" key={key}>
-          <Skeleton className="aspect-[16/9] w-full rounded-xl" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-3 w-1/2" />
+          <Skeleton className="aspect-[1.18] w-full rounded-2xl" />
+          <Skeleton className="h-5 w-4/5 rounded-full" />
+          <Skeleton className="h-4 w-3/5 rounded-full" />
         </div>
       ))}
     </div>

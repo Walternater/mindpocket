@@ -16,6 +16,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { hasPlatformIcon, PlatformIcon } from "@/components/icons/platform-icons"
 import { MoveToFolderDialog } from "@/components/move-to-folder-dialog"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -92,6 +93,21 @@ function getGradientFromUrl(url: string | null) {
   return gradients[hash % gradients.length]
 }
 
+function getTypeLabel(type: string, t: ReturnType<typeof useT>) {
+  switch (type) {
+    case "link":
+      return t.bookmarkList.typeLink
+    case "article":
+      return t.bookmarkList.typeArticle
+    case "video":
+      return t.bookmarkList.typeVideo
+    case "image":
+      return t.bookmarkList.typeImage
+    default:
+      return type
+  }
+}
+
 export function BookmarkCard({ item }: { item: BookmarkItem }) {
   const t = useT()
   const TypeIcon = typeIcons[item.type] || Link2
@@ -106,24 +122,26 @@ export function BookmarkCard({ item }: { item: BookmarkItem }) {
 
   const displayFolderName = folderInfo.folderName
   const displayFolderEmoji = folderInfo.folderEmoji
+  const hasPlatform = hasPlatformIcon(item.platform)
+  const showFallbackTypeMeta = !(displayFolderName || domain || hasPlatform)
 
   return (
     <>
       <Link
         className={cn(
-          "group relative flex flex-col overflow-hidden rounded-xl border bg-card",
-          "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+          "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/95 shadow-sm",
+          "transition-all duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-lg hover:shadow-black/5"
         )}
         href={`/bookmark?id=${item.id}`}
       >
-        {/* 封面图 */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
+        {/* 封面图和状态信息 */}
+        <div className="relative aspect-[1.18] w-full overflow-hidden bg-muted">
           {item.coverImage ? (
             <NextImage
               alt={item.title}
-              className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
               fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
               src={item.coverImage}
             />
           ) : (
@@ -133,21 +151,50 @@ export function BookmarkCard({ item }: { item: BookmarkItem }) {
                 gradient
               )}
             >
-              <TypeIcon className="size-8 text-muted-foreground/50" />
+              <TypeIcon className="size-7 text-foreground/35" />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent opacity-90" />
+
+          <div className="absolute top-2 left-2 flex items-center gap-1.5">
+            <Badge
+              className="border-white/15 bg-black/40 text-white backdrop-blur-md"
+              variant="outline"
+            >
+              <TypeIcon className="size-3.5" />
+              {getTypeLabel(item.type, t)}
+            </Badge>
+            {item.isFavorite && (
+              <Badge className="border-rose-400/20 bg-rose-500/85 text-white backdrop-blur-md">
+                <Heart className="size-3.5 fill-current" />
+              </Badge>
+            )}
+          </div>
+
+          {(hasPlatform || domain) && (
+            <div className="absolute bottom-2 left-2 max-w-[calc(100%-4rem)]">
+              <div className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/15 bg-black/35 px-2.5 py-1 text-white text-xs backdrop-blur-md">
+                {hasPlatform ? (
+                  <PlatformIcon platform={item.platform!} />
+                ) : (
+                  <Link2 className="size-3 shrink-0" />
+                )}
+                <span className="truncate">{domain || item.platform}</span>
+              </div>
             </div>
           )}
 
           {/* 悬浮操作按钮 */}
-          <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
-                  className="size-7 bg-background/80 backdrop-blur-sm"
+                  className="size-7 rounded-full border border-white/15 bg-black/35 text-white backdrop-blur-md hover:bg-black/55 hover:text-white"
                   onClick={(e) => e.preventDefault()}
                   size="icon"
                   variant="ghost"
                 >
-                  <MoreHorizontal className="size-3.5" />
+                  <MoreHorizontal className="size-3" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" onClick={(e) => e.preventDefault()}>
@@ -171,41 +218,45 @@ export function BookmarkCard({ item }: { item: BookmarkItem }) {
         </div>
 
         {/* 内容区域 */}
-        <div className="flex flex-1 flex-col gap-2 p-3">
+        <div className="flex flex-1 flex-col gap-2.5 p-3">
           {/* 标题 */}
-          <h3 className="line-clamp-2 font-medium text-sm leading-snug">{item.title}</h3>
-
-          {/* 描述 */}
-          {item.description && (
-            <p className="line-clamp-2 text-muted-foreground text-xs leading-relaxed">
-              {item.description}
-            </p>
-          )}
+          <h3 className="line-clamp-2 min-h-[2.75rem] font-semibold text-[0.95rem] leading-6 tracking-[-0.01em]">
+            {item.title}
+          </h3>
 
           {/* 底部元信息 */}
-          <div className="mt-auto flex items-center gap-2 pt-1 text-muted-foreground text-xs">
+          <div className="mt-auto flex flex-wrap items-center gap-1.5 text-muted-foreground text-xs">
             {displayFolderName && (
-              <span className="flex items-center gap-1 truncate">
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-muted px-2 py-1">
                 <span>{displayFolderEmoji || "📁"}</span>
                 <span className="truncate">{displayFolderName}</span>
               </span>
             )}
-            {displayFolderName && (hasPlatformIcon(item.platform) || domain) && <span>·</span>}
-            {hasPlatformIcon(item.platform) ? (
-              <PlatformIcon platform={item.platform!} />
-            ) : (
-              domain && (
-                <span className="flex items-center gap-1 truncate">
-                  <Link2 className="size-3 shrink-0" />
-                  <span className="truncate">{domain}</span>
-                </span>
-              )
+            {!hasPlatform && domain && (
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-muted/70 px-2 py-1">
+                <Link2 className="size-3 shrink-0" />
+                <span className="truncate">{domain}</span>
+              </span>
             )}
-          </div>
-
-          <div className="flex items-center justify-between text-muted-foreground text-xs">
-            <span>{getRelativeTime(item.createdAt, t)}</span>
-            {item.isFavorite && <Heart className="size-3 fill-red-500 text-red-500" />}
+            <span className="ml-auto inline-flex items-center rounded-full bg-muted/60 px-2 py-1 font-medium text-[11px]">
+              {getRelativeTime(item.createdAt, t)}
+            </span>
+            {hasPlatform && (
+              <span className="inline-flex size-6 items-center justify-center rounded-full border bg-background">
+                <PlatformIcon platform={item.platform!} />
+              </span>
+            )}
+            {item.isFavorite && !item.coverImage && (
+              <span className="inline-flex size-6 items-center justify-center rounded-full bg-rose-50 text-rose-500 dark:bg-rose-950/40">
+                <Heart className="size-3 shrink-0 fill-current" />
+              </span>
+            )}
+            {showFallbackTypeMeta && (
+              <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-muted/70 px-2 py-1">
+                <TypeIcon className="size-3 shrink-0" />
+                <span className="truncate">{getTypeLabel(item.type, t)}</span>
+              </span>
+            )}
           </div>
         </div>
       </Link>

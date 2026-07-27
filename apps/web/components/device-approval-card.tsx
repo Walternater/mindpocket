@@ -57,7 +57,7 @@ async function fetchVerificationStatus(value: string) {
   if (!normalizeUserCode(formatted)) {
     return {
       status: "error" as const,
-      message: "请输入 CLI 显示的用户验证码。",
+      message: "请输入应用显示的用户验证码。",
     }
   }
 
@@ -78,7 +78,7 @@ async function fetchVerificationStatus(value: string) {
   if (nextStatus === "pending") {
     return {
       status: nextStatus,
-      message: "验证码有效。确认后，这个 CLI 将以你的账户身份访问 MindPocket。",
+      message: "验证码有效。确认后，该设备将以你的账户身份访问 MindPocket。",
     }
   }
 
@@ -104,10 +104,10 @@ async function fetchVerificationStatus(value: string) {
 
 function getDecisionMessage(decision: "approve" | "deny") {
   if (decision === "approve") {
-    return "授权成功。你可以回到终端，CLI 会继续完成登录。"
+    return "授权成功。你可以回到应用，它会继续完成登录。"
   }
 
-  return "你已拒绝这次设备授权。CLI 轮询会收到拒绝结果。"
+  return "你已拒绝这次设备授权。应用会收到拒绝结果。"
 }
 
 export function DeviceApprovalCard({ initialUserCode, userName }: DeviceApprovalCardProps) {
@@ -177,15 +177,15 @@ export function DeviceApprovalCard({ initialUserCode, userName }: DeviceApproval
         正在校验设备授权状态...
       </span>
     ) : (
-      <span>{message || "打开 CLI 提供的链接后，这里会显示授权状态。"}</span>
+      <span>{message || "打开应用提供的链接后，这里会显示授权状态。"}</span>
     )
 
   return (
     <Card className="mx-auto w-full max-w-xl">
       <CardHeader>
-        <CardTitle>授权 MindPocket CLI</CardTitle>
+        <CardTitle>授权 MindPocket 设备访问</CardTitle>
         <CardDescription>
-          当前登录账户：{userName}。输入或确认 CLI 展示的用户验证码，然后决定是否授权。
+          当前登录账户：{userName}。输入或确认应用展示的用户验证码，然后决定是否授权。
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -13,8 +13,6 @@ export const user = sqliteTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified", { mode: "boolean" }).default(false).notNull(),
   image: text("image"),
-  // 2FA 开关标志（通过 TOTP 验证后才会置为 true）
-  twoFactorEnabled: integer("two_factor_enabled", { mode: "boolean" }).default(false),
   createdAt: timestampMs("created_at")
     .$defaultFn(() => new Date())
     .notNull(),
@@ -110,23 +108,6 @@ export const deviceCode = sqliteTable(
     index("device_code_expires_at_idx").on(table.expiresAt),
   ]
 )
-
-// Better Auth twoFactor 插件所需表：存储加密 TOTP 密钥和备用码
-export const twoFactor = sqliteTable("two_factor", {
-  id: text("id").primaryKey(),
-  secret: text("secret").notNull(),
-  backupCodes: text("backup_codes").notNull(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-})
-
-export const twoFactorRelations = relations(twoFactor, ({ one }) => ({
-  user: one(user, {
-    fields: [twoFactor.userId],
-    references: [user.id],
-  }),
-}))
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),

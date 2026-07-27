@@ -12,6 +12,5 @@ userRoute.get("/", (c) => {
     name: user.name,
     email: user.email,
     avatar: user.image || "",
-    twoFactorEnabled: user.twoFactorEnabled ?? false,
   })
 })

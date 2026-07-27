@@ -2,7 +2,6 @@ import { expo } from "@better-auth/expo"
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { APIError } from "better-auth/api"
-import { twoFactor } from "better-auth/plugins"
 import { bearer } from "better-auth/plugins/bearer"
 import { deviceAuthorization } from "better-auth/plugins/device-authorization"
 import { count } from "drizzle-orm"
@@ -12,6 +11,7 @@ import { BETTER_AUTH_COOKIE_PREFIX } from "./auth-flow"
 
 const DEFAULT_APP_URL = "http://127.0.0.1:8787"
 const CLI_CLIENT_ID = "mindpocket-cli"
+const EXT_CLIENT_ID = "mindpocket-extension"
 
 /**
  * 每请求构造 Better Auth 实例
@@ -40,7 +40,7 @@ export function createAuth(env: Env, db: Database) {
     ],
     database: drizzleAdapter(db, {
       provider: "sqlite",
-      // 需要显式传入 schema，否则插件添加的模型（如 twoFactor）无法被适配器发现
+      // 需要显式传入 schema，否则插件添加的模型无法被适配器发现
       schema,
     }),
     emailAndPassword: {
@@ -68,13 +68,12 @@ export function createAuth(env: Env, db: Database) {
     plugins: [
       bearer(),
       expo(),
-      twoFactor(),
       deviceAuthorization({
         expiresIn: "15m",
         interval: "5s",
         verificationUri: "/device",
         validateClient(clientId) {
-          return clientId === CLI_CLIENT_ID
+          return clientId === CLI_CLIENT_ID || clientId === EXT_CLIENT_ID
         },
       }),
     ],
