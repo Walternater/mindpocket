@@ -1,3 +1,4 @@
+import { htmlToMarkdown } from "../markdown"
 import {
   buildFallbackPayload,
   createMindPocketButton,
@@ -92,10 +93,13 @@ function buildTweetPayload(bookmarkBtn: Element): SavePayload {
     return buildFallbackPayload()
   }
 
+  // 端侧转换：推文 HTML → Markdown，失败则回退原始 HTML
+  const html = extractTweetHtml(tweetRoot)
+  const markdown = htmlToMarkdown(html)
   return {
     url: extractTweetPermalink(tweetRoot),
     title: extractTweetTitle(tweetRoot),
-    html: extractTweetHtml(tweetRoot),
+    ...(markdown ? { markdown } : { html }),
   }
 }
 

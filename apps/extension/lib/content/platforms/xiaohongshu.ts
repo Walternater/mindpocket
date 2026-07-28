@@ -1,3 +1,4 @@
+import { htmlToMarkdown } from "../markdown"
 import {
   buildFallbackPayload,
   createMindPocketButton,
@@ -173,10 +174,13 @@ function buildXiaohongshuPayload(source: Element): SavePayload {
     return buildFallbackPayload()
   }
 
+  // 端侧转换：笔记 HTML → Markdown，失败则回退原始 HTML
+  const html = extractNoteHtml(noteRoot)
+  const markdown = htmlToMarkdown(html)
   return {
     url: findCanonicalUrl(),
     title: getNoteTitle(noteRoot),
-    html: extractNoteHtml(noteRoot),
+    ...(markdown ? { markdown } : { html }),
   }
 }
 

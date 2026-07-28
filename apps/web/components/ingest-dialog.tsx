@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useT } from "@/lib/i18n"
+import { appendPdfMarkdown } from "@/lib/pdf-extract"
 import { cn } from "@/lib/utils"
 
 const ACCEPT_TYPES = [
@@ -144,6 +145,8 @@ export function IngestDialog({ folders = [], onSuccess, trigger }: IngestDialogP
       if (title.trim()) {
         formData.append("title", title.trim())
       }
+      // PDF 在浏览器端解析文本后随表单上传（服务端无法解析 PDF）
+      await appendPdfMarkdown(formData, selectedFile)
 
       const res = await fetch("/api/ingest", {
         method: "POST",

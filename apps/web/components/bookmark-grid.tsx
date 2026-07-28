@@ -248,7 +248,7 @@ function BookmarkListItem({ item }: { item: BookmarkItem }) {
   return (
     <>
       <div className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50">
-        <Link className="flex min-w-0 flex-1 items-center gap-3" href={`/bookmark/${item.id}`}>
+        <Link className="flex min-w-0 flex-1 items-center gap-3" href={`/bookmark?id=${item.id}`}>
           <TypeIcon className="size-4 shrink-0 text-muted-foreground" />
           <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
           {item.folderName && (

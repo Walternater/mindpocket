@@ -132,7 +132,7 @@ export function BookmarkCard({ item }: { item: BookmarkItem }) {
           "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/95 shadow-sm",
           "transition-all duration-200 hover:-translate-y-0.5 hover:border-border hover:shadow-lg hover:shadow-black/5"
         )}
-        href={`/bookmark/${item.id}`}
+        href={`/bookmark?id=${item.id}`}
       >
         {/* 封面图和状态信息 */}
         <div className="relative aspect-[1.18] w-full overflow-hidden bg-muted">

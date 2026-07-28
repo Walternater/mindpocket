@@ -2,8 +2,8 @@
 
 import type { BookmarkType } from "@repo/types"
 import { Badge } from "@/components/ui/badge"
+import { EXTENSION_TYPE_MAP } from "@/lib/file-types"
 import { useT } from "@/lib/i18n"
-import { EXTENSION_TYPE_MAP } from "@/lib/ingest/types"
 
 export function SettingsFileParsing() {
   const t = useT()

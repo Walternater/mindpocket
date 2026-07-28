@@ -1,0 +1,48 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mindpocket",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-06-01",
+  // node:crypto (AES-GCM) 等 Node API 依赖此 flag
+  "compatibility_flags": ["nodejs_compat"],
+  // 前端静态资产：Next.js 静态导出产物，SPA 模式兜底到 index.html
+  "assets": {
+    "directory": "../web/out",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  // D1：关系数据（用户/书签/文件夹/对话）
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mindpocket",
+      // 部署前用 `wrangler d1 create mindpocket` 创建并回填真实 ID
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "db/migrations"
+    }
+  ],
+  // Vectorize：1024 维 cosine 向量索引（替代 pgvector）
+  // 创建命令：wrangler vectorize create mindpocket-embeddings --dimensions=1024 --metric=cosine
+  "vectorize": [
+    {
+      "binding": "VECTORIZE",
+      "index_name": "mindpocket-embeddings"
+    }
+  ],
+  // R2：文件存储（替代 MinIO）
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "mindpocket"
+    }
+  ],
+  "vars": {
+    // R2 公开访问域名（r2.dev 或自定义域），部署时覆盖
+    "R2_PUBLIC_URL": "",
+    "NEXT_PUBLIC_APP_URL": "http://127.0.0.1:8787"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

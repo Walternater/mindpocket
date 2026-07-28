@@ -1,6 +1,11 @@
+import { parseDocumentToMarkdown } from "./markdown"
+
 export interface SavePayload {
   url: string
-  html: string
+  // 端侧解析好的 Markdown（新协议，优先）
+  markdown?: string
+  // 原始 HTML（解析失败时的降级方案，服务端转换）
+  html?: string
   title?: string
 }
 
@@ -29,6 +34,15 @@ export function toAbsoluteUrl(href: string | null): string | null {
 }
 
 export function buildFallbackPayload(): SavePayload {
+  // 端侧解析：Readability 提取正文并转 Markdown，失败再回退整页 HTML
+  const { title, markdown } = parseDocumentToMarkdown()
+  if (markdown) {
+    return {
+      url: window.location.href,
+      title: title ?? document.title,
+      markdown,
+    }
+  }
   return {
     url: window.location.href,
     title: document.title,

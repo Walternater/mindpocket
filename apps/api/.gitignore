@@ -1,0 +1,4 @@
+# wrangler 本地状态与密钥
+.wrangler/
+.dev.vars
+worker-configuration.d.ts

@@ -1,18 +1,13 @@
-import { headers } from "next/headers"
-import { redirect } from "next/navigation"
-import { auth } from "@/lib/auth"
+"use client"
+
+import { AuthGuard } from "@/components/auth-guard"
 import { AppShell } from "./shell"
 
-export const dynamic = "force-dynamic"
-
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
-
-  if (!session?.user) {
-    redirect("/login")
-  }
-
-  return <AppShell>{children}</AppShell>
+// 静态导出后由客户端守卫负责登录校验
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AuthGuard>
+      <AppShell>{children}</AppShell>
+    </AuthGuard>
+  )
 }

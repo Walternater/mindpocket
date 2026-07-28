@@ -180,9 +180,45 @@ export async function signOut() {
   await removeCachedUser()
 }
 
-export function saveBookmark(payload: { url: string; html: string; title?: string }) {
+export function saveBookmark(payload: {
+  url: string
+  markdown?: string
+  html?: string
+  title?: string
+}) {
   return authFetch("/api/ingest", {
     method: "POST",
     body: JSON.stringify({ ...payload, clientSource: "extension" }),
+  })
+}
+
+// ==================== 浏览器抓取队列 ====================
+
+export interface BrowserTask {
+  id: string
+  url: string | null
+  title: string
+}
+
+/** 认领待抓任务（服务端抓取失败、等待浏览器补抓的书签） */
+export async function claimBrowserTasks(limit = 3): Promise<BrowserTask[]> {
+  const res = await authFetch("/api/ingest/browser-tasks/claim", {
+    method: "POST",
+    body: JSON.stringify({ limit }),
+  })
+  if (!res.ok) {
+    return []
+  }
+  return (res.data?.tasks ?? []) as BrowserTask[]
+}
+
+/** 回传抓取结果（成功带 markdown/html，失败带 error） */
+export function reportBrowserResult(
+  id: string,
+  result: { markdown?: string; html?: string; title?: string; error?: string }
+) {
+  return authFetch(`/api/ingest/${id}/browser-result`, {
+    method: "POST",
+    body: JSON.stringify(result),
   })
 }

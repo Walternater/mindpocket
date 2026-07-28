@@ -37,6 +37,7 @@ import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useT } from "@/lib/i18n"
+import { appendPdfMarkdown } from "@/lib/pdf-extract"
 
 interface HistoryItem {
   id: string
@@ -120,7 +121,10 @@ export default function IngestPage() {
   // 轮询：当有 pending/processing 状态时每 3 秒刷新
   useEffect(() => {
     const hasPending = history.some(
-      (item) => item.ingestStatus === "pending" || item.ingestStatus === "processing"
+      (item) =>
+        item.ingestStatus === "pending" ||
+        item.ingestStatus === "processing" ||
+        item.ingestStatus === "processing_browser"
     )
 
     if (hasPending) {
@@ -340,6 +344,8 @@ function FileIngestForm({
       if (title.trim()) {
         formData.append("title", title.trim())
       }
+      // PDF 在浏览器端解析文本后随表单上传（服务端无法解析 PDF）
+      await appendPdfMarkdown(formData, selectedFile)
       const res = await fetch("/api/ingest", {
         method: "POST",
         body: formData,
@@ -594,6 +600,22 @@ function StatusBadge({ status, t }: { status: string; t: ReturnType<typeof useT>
           {t.ingest.statusFailed}
         </Badge>
       )
+    // 服务端抓取失败，等待浏览器扩展补抓
+    case "pending_browser":
+      return (
+        <Badge className="gap-1" variant="secondary">
+          <Globe className="size-3" />
+          {t.ingest.statusPendingBrowser}
+        </Badge>
+      )
+    // 已被浏览器扩展认领，抓取中
+    case "processing_browser":
+      return (
+        <Badge className="gap-1" variant="secondary">
+          <Loader2 className="size-3 animate-spin" />
+          {t.ingest.statusProcessingBrowser}
+        </Badge>
+      )
     default:
       return <Badge variant="outline">{status}</Badge>
   }
@@ -617,7 +639,7 @@ function HistoryRow({ item, t }: { item: HistoryItem; t: ReturnType<typeof useT>
         {item.ingestStatus === "completed" ? (
           <Link
             className="block truncate font-medium text-sm hover:underline"
-            href={`/bookmark/${item.id}`}
+            href={`/bookmark?id=${item.id}`}
           >
             {item.title}
           </Link>
